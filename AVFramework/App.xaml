@@ -1,0 +1,68 @@
+﻿<Application x:Class="AVFramework.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:AVFramework"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <Style x:Key="NormBlock" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="ListBlock" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="Gray"/>
+        </Style>
+
+        <Style x:Key="NormBox" TargetType="TextBox">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Background" Value="#e7fabf"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="NormComboBox" TargetType="ComboBox">
+            <Setter Property="Width" Value="120"/>
+            <Setter Property="Background" Value="#e7fabf"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="RoundCheckBox" TargetType="CheckBox">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Background" Value="#e7fabf"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <Style x:Key="RoundButton" TargetType="Button">
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#04a0ff"/>
+            <Setter Property="Control.BorderBrush" Value="{x:Null}"/>
+            <Setter Property="Control.BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border CornerRadius="5" Background="{TemplateBinding Background}">
+                            <ContentPresenter Content="{Binding Path=Content, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}"
+                                              VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="#00619e"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Application.Resources>
+</Application>
