@@ -16,6 +16,5 @@
             <TextBlock Name="CurrentTask"></TextBlock>
             <RichTextBox x:Name="LogBox" Height="300" Margin="5"></RichTextBox>
         </StackPanel>
-     
     </Grid>
 </Window>

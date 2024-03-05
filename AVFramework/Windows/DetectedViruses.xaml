@@ -5,20 +5,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AVFramework.Windows"
         mc:Ignorable="d"
-        Title="DetectedViruses" Height="450" Width="800">
+        Title="DetectedViruses" Height="450" Width="800" Closed="Window_Closed">
     <Grid>
         <StackPanel>
             <StackPanel HorizontalAlignment="Center">
-                <TextBlock Text="Вирусы"></TextBlock>
+                <TextBlock Text="Вирусы" Margin="5"></TextBlock>
             </StackPanel>
             <StackPanel>
-                <ListBox x:Name="VirusesLB" Height="200">
+                <ListBox x:Name="VirusesLB" Height="200" Margin="5">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding}"></TextBlock>
-                                <Button Style="{StaticResource RoundButton}">Удалить</Button>
-                                <Button Style="{StaticResource RoundButton}">Оставить</Button>
+                                <StackPanel Margin="5" Width="530">
+                                    <TextBlock Text="{Binding}" Style="{StaticResource NormBlock}" Margin="5"></TextBlock>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="5">
+                                    <Button Style="{StaticResource RoundButton}" Margin="5">Удалить</Button>
+                                    <Button Style="{StaticResource RoundButton}" Margin="5">Оставить</Button>
+                                </StackPanel>
                             </StackPanel>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
