@@ -12,7 +12,7 @@
                 <Button Style="{StaticResource RoundButton}" Width="150" Height="40" Click="Button_Click">Сканировать папку</Button>
                 <Button x:Name="ChooseFileBtn" Style="{StaticResource RoundButton}" Width="150" Height="40" Click="ChooseFileBtn_Click">Сканировать файл</Button>
             </StackPanel>
-            <ProgressBar x:Name="ScanPG" Height="25" />
+            <ProgressBar x:Name="ScanPG" Minimum="0" Value="0" Height="25" />
             <TextBlock Name="CurrentTask"></TextBlock>
             <RichTextBox x:Name="LogBox" Height="300" Margin="5"></RichTextBox>
         </StackPanel>

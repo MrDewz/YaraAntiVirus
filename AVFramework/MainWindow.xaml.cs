@@ -29,6 +29,8 @@ namespace AVFramework
 
         private static List<string> testfiles;
 
+        private static List<string> ProbableViruses;
+
         Dictionary<string, object> externals = new Dictionary<string, object>()
             {
                 { "filename", string.Empty },
@@ -66,7 +68,7 @@ namespace AVFramework
                         testfiles = Directory.GetFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
                         System.Windows.MessageBox.Show("Files found: " + testfiles.Count.ToString(), "Message");
                         DisplayRulesLoad();
-                        Scan(0);
+                        Scan();
                     }
                 }
             }
@@ -78,7 +80,7 @@ namespace AVFramework
 
         }
 
-        private void ChooseFileBtn_Click(object sender, RoutedEventArgs e)
+        private async void ChooseFileBtn_Click(object sender, RoutedEventArgs e)
         { 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -93,13 +95,14 @@ namespace AVFramework
                     testfiles = openFileDialog.FileNames.ToList();
                     ScanPG.Maximum = testfiles.Count;
                     DisplayRulesLoad();
-                    Scan().Start();
+                    Scan();
                 }
             }
         }
 
-        private async Task Scan()
+        private void Scan()
         {
+            //progress bar реализовать с помощью backgroundWorker => https://wpf-tutorial.com/ru/65/дополнительные-элементы/элемент-управления-progressbar/
             try
             {
                 YaraScanner yaraScanner = new YaraScanner(compiler);
@@ -112,11 +115,17 @@ namespace AVFramework
                     //ScanPG.Value += _i;
 
                     //Scan(_i);                   
-                    yaraScanner.ScanFile(testfiles[i]).Wait();
-                    bool result = yaraScanner.ScanFile(testfiles[i]).Result;
+                    //yaraScanner.ScanFile(testfiles[i]).Wait();
+                    bool result = yaraScanner.ScanFile(testfiles[i]);
                     LogBox.AppendText($"File {testfiles[i]} is {result} virus\n");
-                    break;
+                    if (result)
+                    {
+                        ProbableViruses.Add(testfiles[i]);
+                    }
+                    ScanPG.Value++;
                 }
+                System.Windows.MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
+                compiler.Dispose();
             }
             catch (Exception)
             {
@@ -130,6 +139,7 @@ namespace AVFramework
             try
             {
                 compiler = yaraInstance.CompileFromFiles(ruleFilenames, externals);
+                
             }
             catch (Exception)
             {
@@ -143,6 +153,7 @@ namespace AVFramework
             string[] LoadingBar = { "[\\]", "[|]", "[/]", "[--]" };
             int i = 0;
             CurrentTask.Text = "Loading virus signature database, please wait...";
+            Task.Run(LoadRules);
             LoadRules();  
             while (!LoadRules().IsCompleted)
             {

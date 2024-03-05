@@ -31,7 +31,7 @@ namespace AVFramework
         //    }
         //}
 
-        public async Task<bool> ScanFile(string filePath)
+        public bool ScanFile(string filePath)
         {
             //YSReport compilerErrors = _compiler.GetErrors();
             //YSReport compilerWarnings = _compiler.GetWarnings();
@@ -39,7 +39,7 @@ namespace AVFramework
             YSScanner scanner = new YSScanner(_compiler.GetRules(), null);
             //var f = scanner.ScanFile(filePath);
             bool result = scanner.ScanFile(filePath).Any(r => r.Rule.Identifier == "WarningRule");
-            scanner.Dispose();
+            //scanner.Dispose();
             //_compiler.Dispose();
             return result;
           
