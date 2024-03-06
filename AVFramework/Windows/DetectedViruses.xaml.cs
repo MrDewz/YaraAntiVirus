@@ -1,19 +1,8 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Security.Policy;
-//using System.Windows.Forms;
 
 namespace AVFramework.Windows
 {
@@ -27,8 +16,11 @@ namespace AVFramework.Windows
         {
             InitializeComponent();
             ProbableViruses = probableViruses;
-            DataContext = this;  
-            RefreshListBox();
+            DataContext = this;
+            foreach (var item in ProbableViruses)
+            {
+                VirusesLB.Items.Add(item);
+            }
         }
 
         private void Window_Closed(object sender, EventArgs e)
@@ -49,14 +41,6 @@ namespace AVFramework.Windows
             Button button = sender as Button;
             int index = VirusesLB.Items.IndexOf(button.DataContext);
             VirusesLB.Items.RemoveAt(index);
-        }
-
-        private void RefreshListBox()
-        {
-            foreach (var item in ProbableViruses)
-            {
-                VirusesLB.Items.Add(item);
-            }
         }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AVFramework.Classes
 {
@@ -37,9 +33,9 @@ namespace AVFramework.Classes
                     RegistryKey.DeleteValue(Name);
                 else
                     if (RegistryKey.GetValue(Name) == null)
-                        RegistryKey.SetValue(Name, ExePath);
-                    else
-                        return false;
+                    RegistryKey.SetValue(Name, ExePath);
+                else
+                    return false;
 
                 RegistryKey.Flush();
                 RegistryKey.Close();

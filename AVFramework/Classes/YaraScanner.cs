@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using YaraSharp;
 
 namespace AVFramework
@@ -17,10 +11,10 @@ namespace AVFramework
 
         //public YaraScanner()
         //{
-            
-            //_compiler = _yaraInstance.CompileFromFiles(ruleFilenames, externals);
-            //LoadRules(ruleFiles);
-            //_context = new YSContext();
+
+        //_compiler = _yaraInstance.CompileFromFiles(ruleFilenames, externals);
+        //LoadRules(ruleFiles);
+        //_context = new YSContext();
         //}
 
         //public void LoadRules(string[] ruleFiles)
@@ -42,7 +36,7 @@ namespace AVFramework
             scanner.Dispose();
             //_compiler.Dispose();
             return result;
-          
+
         }
     }
 }

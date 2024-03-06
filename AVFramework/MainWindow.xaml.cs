@@ -1,22 +1,13 @@
-﻿//using Microsoft.Win32;
+﻿using AVFramework.Classes;
+using AVFramework.Windows;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Windows.Forms;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
+using System.Windows.Forms;
 using YaraSharp;
-using AVFramework.Windows;
-using AVFramework.Classes;
 
 namespace AVFramework
 {
@@ -146,7 +137,7 @@ namespace AVFramework
                     //}
                 }
                 compiler.Dispose();
-                
+
             }
             catch (Exception)
             {
@@ -159,7 +150,7 @@ namespace AVFramework
         {
             try
             {
-                compiler = yaraInstance.CompileFromFiles(ruleFilenames, externals);                                
+                compiler = yaraInstance.CompileFromFiles(ruleFilenames, externals);
             }
             catch (Exception)
             {
@@ -174,7 +165,7 @@ namespace AVFramework
             int i = 0;
             CurrentTask.Text = "Loading virus signature database, please wait...";
             Task.Run(LoadRules);
-            LoadRules();  
+            LoadRules();
             while (!LoadRules().IsCompleted)
             {
                 CurrentTask.Text = "Loading virus signature database, please wait..." + LoadingBar[i];
