@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using YaraSharp;
 using AVFramework.Windows;
+using AVFramework.Classes;
 
 namespace AVFramework
 {
@@ -44,11 +45,13 @@ namespace AVFramework
 
         YSCompiler compiler = new YSCompiler(null);
 
+        AutoRunClass AutoRun = new AutoRunClass("YaraScanner");
+
         public MainWindow()
         {
             InitializeComponent();
             ruleFilenames = Directory.GetFiles(Path.Combine(BaseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
-            //testfiles = Directory.GetFiles(Path.Combine(BaseDirectory, "TestData"), "*.txt", SearchOption.AllDirectories).ToList();
+            AutoRunCheckBox.IsChecked = AutoRun.IsAutoRun();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -181,6 +184,16 @@ namespace AVFramework
                     i = 0;
                 }
             }
+        }
+
+        private void AutoRunCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            AutoRun.SetAutoRun(true);
+        }
+
+        private void AutoRunCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AutoRun.SetAutoRun(false);
         }
     }
 }
