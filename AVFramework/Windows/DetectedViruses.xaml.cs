@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Security.Policy;
+//using System.Windows.Forms;
 
 namespace AVFramework.Windows
 {
@@ -24,12 +27,36 @@ namespace AVFramework.Windows
         {
             InitializeComponent();
             ProbableViruses = probableViruses;
-            VirusesLB.ItemsSource = ProbableViruses;
+            DataContext = this;  
+            RefreshListBox();
         }
 
         private void Window_Closed(object sender, EventArgs e)
         {
             ProbableViruses.Clear();
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            int index = VirusesLB.Items.IndexOf(button.DataContext);
+            VirusesLB.Items.RemoveAt(index);
+            File.Delete(ProbableViruses[index]);
+        }
+
+        private void RemainButtonClick_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            int index = VirusesLB.Items.IndexOf(button.DataContext);
+            VirusesLB.Items.RemoveAt(index);
+        }
+
+        private void RefreshListBox()
+        {
+            foreach (var item in ProbableViruses)
+            {
+                VirusesLB.Items.Add(item);
+            }
         }
     }
 }
