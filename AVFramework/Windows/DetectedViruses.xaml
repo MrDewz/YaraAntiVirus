@@ -20,7 +20,7 @@
                                     <TextBlock Text="{Binding}" Style="{StaticResource NormBlock}" Margin="5"></TextBlock>
                                 </StackPanel>
                                 <StackPanel Orientation="Horizontal" Margin="5">
-                                    <Button Style="{StaticResource RoundButton}" Click="DeleteButton_Click" Margin="5"
+                                    <Button Style="{StaticResource RoundButtonMain}" Click="DeleteButton_Click" Margin="5"
                                             CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}}">Удалить</Button>
                                     <Button Style="{StaticResource RoundButton}" Click="RemainButtonClick_Click" Margin="5">Оставить</Button>
                                 </StackPanel>

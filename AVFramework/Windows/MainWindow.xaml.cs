@@ -30,11 +30,11 @@ namespace AVFramework
                 { "filepath", string.Empty },
                 { "extension", string.Empty }
             };
-        YSInstance yaraInstance = new YSInstance();
+        YSInstance YaraInstance = new YSInstance();
 
         YSContext context = new YSContext();
 
-        YSCompiler compiler = new YSCompiler(null);
+        YSCompiler Compiler = new YSCompiler(null);
 
         AutoRunClass AutoRun = new AutoRunClass("YaraScanner");
 
@@ -105,14 +105,8 @@ namespace AVFramework
                 for (int i = 0; i < testfiles.Count; i++)
                 {
                     CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
-                    //yaraScanner.ScanFile(testfiles[i]).Start();
-                    //System.Windows.MessageBox.Show($"File {testfiles[i]} is {yaraScanner.ScanFile(testfiles[i])} virus");
-                    //_i++;
-                    //ScanPG.Value += _i;
 
-                    //Scan(_i);                   
-                    //yaraScanner.ScanFile(testfiles[i]).Wait();
-                    bool result = yaraScanner.ScanFile(testfiles[i], compiler);
+                    bool result = yaraScanner.ScanFile(testfiles[i], Compiler);
 
                     LogBox.AppendText($"File {testfiles[i]} is {result} virus\n");
                     ScanPG.Value++;
@@ -127,16 +121,8 @@ namespace AVFramework
                 {
                     DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
                     detectedVirusesWindow.Show();
-
-                    //if (System.Windows.MessageBox.Show("Хотите о",
-                    //    "Обновление",
-                    //    MessageBoxButton.YesNo,
-                    //    MessageBoxImage.Information) == MessageBoxResult.Yes)
-                    //{
-
-                    //}
                 }
-                compiler.Dispose();
+                Compiler.Dispose();
 
             }
             catch (Exception)
@@ -150,7 +136,7 @@ namespace AVFramework
         {
             try
             {
-                compiler = yaraInstance.CompileFromFiles(ruleFilenames, externals);
+                Compiler = YaraInstance.CompileFromFiles(ruleFilenames, externals);
             }
             catch (Exception)
             {
@@ -161,14 +147,14 @@ namespace AVFramework
 
         private void DisplayRulesLoad()
         {
-            string[] LoadingBar = { "[\\]", "[|]", "[/]", "[--]" };
+            string[] loadingAnimation = { "[\\]", "[|]", "[/]", "[--]" };
             int i = 0;
             CurrentTask.Text = "Loading virus signature database, please wait...";
             Task.Run(LoadRules);
             LoadRules();
             while (!LoadRules().IsCompleted)
             {
-                CurrentTask.Text = "Loading virus signature database, please wait..." + LoadingBar[i];
+                CurrentTask.Text = "Loading virus signature database, please wait..." + loadingAnimation[i];
                 i++;
                 if (i == 4)
                 {
@@ -185,6 +171,12 @@ namespace AVFramework
         private void AutoRunCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             AutoRun.SetAutoRun(false);
+        }
+
+        private void VirusReport_Click(object sender, RoutedEventArgs e)
+        {
+            ReportVirusWindow reportVirusWindow = new ReportVirusWindow();
+            reportVirusWindow.ShowDialog();
         }
     }
 }

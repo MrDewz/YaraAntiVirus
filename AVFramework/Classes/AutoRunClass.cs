@@ -25,7 +25,7 @@ namespace AVFramework.Classes
                 return false;
         }
 
-        public bool SetAutoRun(bool autorun)
+        public void SetAutoRun(bool autorun)
         {
             try
             {
@@ -35,11 +35,10 @@ namespace AVFramework.Classes
                     if (RegistryKey.GetValue(Name) == null)
                     RegistryKey.SetValue(Name, ExePath);
                 else
-                    return false;
+                    return;
 
                 RegistryKey.Flush();
                 RegistryKey.Close();
-                return true;
             }
             catch (Exception)
             {

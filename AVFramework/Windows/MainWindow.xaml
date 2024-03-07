@@ -8,10 +8,11 @@
         Title="YaraScan" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
         <StackPanel>
-            <Menu Height="27">
-                <MenuItem Header="Настройки" Margin="5">
+            <Menu>
+                <MenuItem Header="Настройки">
                     <CheckBox x:Name="AutoRunCheckBox" Content="Автозапуск приложения" Checked="AutoRunCheckBox_Checked" Unchecked="AutoRunCheckBox_Unchecked"></CheckBox>
                 </MenuItem>
+                <MenuItem x:Name="VirusReport" Header="Зарепортить вирус" Click="VirusReport_Click"></MenuItem>
             </Menu>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Style="{StaticResource RoundButton}" Width="150" Height="40" Click="Button_Click">Сканировать папку</Button>

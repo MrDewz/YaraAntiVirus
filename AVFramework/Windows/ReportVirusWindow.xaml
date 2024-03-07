@@ -1,0 +1,21 @@
+﻿<Window x:Class="AVFramework.Windows.ReportVirusWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AVFramework.Windows"
+        mc:Ignorable="d"
+        Title="ReportVirusWindow" Height="400" Width="800">
+    <Grid>
+        <StackPanel>
+            <StackPanel Margin="5">
+                <TextBlock Style="{StaticResource NormBlock}">Выберите файл который хотите зарепортить:</TextBlock>
+                <Button x:Name="ChooseFileBtn" Style="{StaticResource RoundButton}" HorizontalAlignment="Left" Click="ChooseFileBtn_Click" Margin="5">Выбрать файл</Button>
+                <TextBlock Style="{StaticResource NormBlock}" Visibility="Collapsed">Файл выбран:</TextBlock>
+                <TextBlock Style="{StaticResource NormBlock}">Пожалуйста опишите почему вы считаете этот файл вирусом:</TextBlock>
+                <RichTextBox x:Name="DescriptionRTB" Height="200" Margin="5"></RichTextBox>
+                <Button Style="{StaticResource RoundButton}" Margin="5" >Отправить</Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>
