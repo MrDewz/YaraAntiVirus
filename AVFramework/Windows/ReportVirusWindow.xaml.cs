@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AVFramework.Classes;
+using CRUDapp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +21,7 @@ namespace AVFramework.Windows
     /// </summary>
     public partial class ReportVirusWindow : Window
     {
+        string FilePath;
         public ReportVirusWindow()
         {
             InitializeComponent();
@@ -26,7 +29,44 @@ namespace AVFramework.Windows
 
         private void ChooseFileBtn_Click(object sender, RoutedEventArgs e)
         {
+            string filePath;
+            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
 
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    //Get the path of specified file
+                    filePath = openFileDialog.FileName;
+                    CurrentFile.Text += filePath;
+                } 
+            }
+        }
+
+        private async void SendBtn_Click(object sender, RoutedEventArgs e)
+        {
+            MailClass mail = new MailClass();
+            string description = new TextRange(DescriptionRTB.Document.ContentStart, DescriptionRTB.Document.ContentEnd).Text;
+            if (string.IsNullOrWhiteSpace(FilePath))
+            {
+                MessageBox.Show("Пожалуйста выберите файл!");
+            }
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                MessageBox.Show("Пожалуйста опишите причину!");
+            }
+            else
+            {
+                var list = InfoComputer.GetComputerInfo();
+                //string compInfo = $"IP Address: {list[0]},Computer Name: {list[1]},Current Date and Time: {list[2]}";
+                await mail.SendMail("Репорт вируса", description, FilePath);
+                MessageBox.Show("Сообщение отправлено!");
+                DialogResult = true;
+                Close();
+            }
         }
     }
 }
