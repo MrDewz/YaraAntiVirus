@@ -42,31 +42,41 @@ namespace AVFramework.Windows
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
                     CurrentFile.Text += filePath;
+                    CurrentFile.Visibility = Visibility.Visible;
                 } 
             }
         }
 
         private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            MailClass mail = new MailClass();
-            string description = new TextRange(DescriptionRTB.Document.ContentStart, DescriptionRTB.Document.ContentEnd).Text;
-            if (string.IsNullOrWhiteSpace(FilePath))
+            try
             {
-                MessageBox.Show("Пожалуйста выберите файл!");
+                MailClass mail = new MailClass();
+                string description = new TextRange(DescriptionRTB.Document.ContentStart, DescriptionRTB.Document.ContentEnd).Text;
+                if (string.IsNullOrWhiteSpace(FilePath))
+                {
+                    MessageBox.Show("Пожалуйста выберите файл!");
+                }
+                if (string.IsNullOrWhiteSpace(description))
+                {
+                    MessageBox.Show("Пожалуйста опишите причину!");
+                }
+                else
+                {
+                    var list = InfoComputer.GetComputerInfo();
+                    //string compInfo = $"IP Address: {list[0]},Computer Name: {list[1]},Current Date and Time: {list[2]}";
+                    await mail.SendMail("Репорт вируса", description, FilePath);
+                    MessageBox.Show("Сообщение отправлено!");
+                    DialogResult = true;
+                    Close();
+                }
             }
-            if (string.IsNullOrWhiteSpace(description))
+            catch (Exception ex)
             {
-                MessageBox.Show("Пожалуйста опишите причину!");
+                Logging.ErrorLog(ex);
+                throw;
             }
-            else
-            {
-                var list = InfoComputer.GetComputerInfo();
-                //string compInfo = $"IP Address: {list[0]},Computer Name: {list[1]},Current Date and Time: {list[2]}";
-                await mail.SendMail("Репорт вируса", description, FilePath);
-                MessageBox.Show("Сообщение отправлено!");
-                DialogResult = true;
-                Close();
-            }
+
         }
     }
 }

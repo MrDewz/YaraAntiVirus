@@ -20,7 +20,7 @@
             </StackPanel>
             <ProgressBar x:Name="ScanPG" Minimum="0" Value="0" Height="25" />
             <TextBlock Name="CurrentTask"></TextBlock>
-            <RichTextBox x:Name="LogBox" Height="300" Margin="5"></RichTextBox>
+            <RichTextBox x:Name="LogBox" Height="300" Margin="5"></RichTextBox><!--Заменить на StackPanel-->
         </StackPanel>
     </Grid>
 </Window>

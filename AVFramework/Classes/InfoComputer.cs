@@ -10,23 +10,30 @@ using System.Threading.Tasks;
 
 namespace CRUDapp
 {
+    public class ComputerInfo
+    {
+        public string Name { get; set; }
+        public string IpAddress { get; set; }
+        public DateTime Time { get; set; }
+    }
+
     public class InfoComputer
     {
-        public static List<string> GetComputerInfo()
+        public static ComputerInfo GetComputerInfo()
         {
-            List<string> result = new List<string>();
-
-            // Получение IP-адреса
-            string ipAddress = GetLocalIPAddress();
-            result.Add(ipAddress);
+            ComputerInfo result = new ComputerInfo();
 
             // Получение имени компьютера
             string computerName = Environment.MachineName;
-            result.Add(computerName);
+            result.Name = computerName;
+
+            // Получение IP-адреса
+            string ipAddress = GetLocalIPAddress();
+            result.IpAddress = ipAddress;
 
             // Получение текущей даты и времени
             DateTime currentTime = DateTime.Now;
-            result.Add(currentTime.ToString());
+            result.Time = currentTime;
 
             return result;
         }

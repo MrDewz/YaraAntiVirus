@@ -68,9 +68,10 @@ namespace AVFramework
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Ошибка");
+                Logging.ErrorLog(ex);
                 throw;
             }
         }
@@ -125,9 +126,10 @@ namespace AVFramework
                 Compiler.Dispose();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 System.Windows.MessageBox.Show("Ошибка сканирования");
+                Logging.ErrorLog(ex);
                 throw;
             }
         }
