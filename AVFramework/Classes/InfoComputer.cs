@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace CRUDapp
+namespace AVFramework.Classes
 {
     public class ComputerInfo
     {
