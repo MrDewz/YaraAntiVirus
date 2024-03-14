@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Data.SqlClient;
+using System.Xml;
 
 namespace Reporter
 {
@@ -55,9 +56,10 @@ namespace Reporter
         }
         private List<string> ConnectToDB()
         {
-
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.Load("connectionString.xml");
             // Строка подключения к вашей базе данных
-            string connectionString = "Server=DESKTOP-D07LP9M\\SQLEXPRESS;Database=YaraAV;Trusted_Connection=True;";
+            string connectionString = xDoc.DocumentElement.FirstChild.Value;
             List<string> names = new List<string>();
             try
             {
