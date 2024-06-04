@@ -8,9 +8,9 @@ namespace AVFramework
 {
     public class YaraScanner
     {
-        private YSCompiler _compiler;
+        //private YSCompiler _compiler;
         //private YSContext _context;
-        private YSInstance _yaraInstance = new YSInstance();
+        //private YSInstance _yaraInstance = new YSInstance();
 
         //public YaraScanner()
         //{
@@ -31,9 +31,8 @@ namespace AVFramework
         public bool ScanFile(string filePath, YSCompiler compiler)
         {
             //YSReport compilerErrors = _compiler.GetErrors();
-            //YSReport compilerWarnings = _compiler.GetWarnings();
-            _compiler = compiler;
-            YSScanner scanner = new YSScanner(_compiler.GetRules(), null);
+            YSReport compilerWarnings = compiler.GetWarnings();
+            YSScanner scanner = new YSScanner(compiler.GetRules(), null);
             var results = scanner.ScanFile(filePath);
             //var f = scanner.ScanFile(filePath);
             bool result = results.Any(r => r.Rule.Identifier == "WarningRule");

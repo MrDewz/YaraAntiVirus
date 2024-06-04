@@ -2,12 +2,18 @@
 using AVFramework.Windows;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Management;
 using YaraSharp;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Window = System.Windows.Window;
 
 namespace AVFramework
 {
@@ -24,17 +30,19 @@ namespace AVFramework
 
         private static List<string> ProbableViruses = new List<string>();
 
-        Dictionary<string, object> externals = new Dictionary<string, object>()
-            {
-                { "filename", string.Empty },
-                { "filepath", string.Empty },
-                { "extension", string.Empty }
-            };
+        //Dictionary<string, object> externals = new Dictionary<string, object>()
+        //    {
+        //        { "filename", string.Empty },
+        //        { "filepath", string.Empty },
+        //        { "extension", string.Empty }
+        //    };
         YSInstance YaraInstance = new YSInstance();
 
         YSContext context = new YSContext();
 
         YSCompiler Compiler = new YSCompiler(null);
+
+        
 
         AutoRunClass AutoRun = new AutoRunClass("YaraScanner");
 
@@ -62,9 +70,17 @@ namespace AVFramework
                     {
                         LogBox.Document.Blocks.Clear();
                         testfiles = Directory.GetFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
+                        ScanPG.Maximum = testfiles.Count;
                         System.Windows.MessageBox.Show("Files found: " + testfiles.Count.ToString(), "Message");
                         DisplayRulesLoad();
-                        Scan();
+
+                        BackgroundWorker worker = new BackgroundWorker();
+                        worker.WorkerReportsProgress = true;
+                        worker.DoWork += Scan;
+                        worker.ProgressChanged += worker_ProgressChanged;
+                        worker.RunWorkerAsync();
+
+                        //Scan();
                     }
                 }
             }
@@ -92,12 +108,20 @@ namespace AVFramework
                     testfiles = openFileDialog.FileNames.ToList();
                     ScanPG.Maximum = testfiles.Count;
                     DisplayRulesLoad();
-                    Scan();
+
+
+                    BackgroundWorker worker = new BackgroundWorker();
+                    worker.WorkerReportsProgress = true;
+                    worker.DoWork += Scan;
+                    worker.ProgressChanged += worker_ProgressChanged;
+                    worker.RunWorkerAsync();
+
+                    //Scan();
                 }
             }
         }
 
-        private void Scan()
+        private void Scan(object sender, DoWorkEventArgs e)
         {
             //progress bar реализовать с помощью backgroundWorker => https://wpf-tutorial.com/ru/65/дополнительные-элементы/элемент-управления-progressbar/
             try
@@ -105,12 +129,20 @@ namespace AVFramework
                 YaraScanner yaraScanner = new YaraScanner();
                 for (int i = 0; i < testfiles.Count; i++)
                 {
-                    CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
+                    });
 
                     bool result = yaraScanner.ScanFile(testfiles[i], Compiler);
 
-                    LogBox.AppendText($"File {testfiles[i]} is {result} virus\n");
-                    ScanPG.Value++;
+                    Dispatcher.Invoke(() =>
+                    {
+                        LogBox.AppendText($"File {testfiles[i]} is {result} virus\n");
+                    });
+
+                    (sender as BackgroundWorker).ReportProgress(i);
 
                     if (result)
                     {
@@ -134,11 +166,14 @@ namespace AVFramework
             }
         }
 
-        private async Task LoadRules()
+        private void LoadRules()
         {
             try
             {
-                Compiler = YaraInstance.CompileFromFiles(ruleFilenames, externals);
+                if (Compiler != null)
+                {
+                    Compiler = YaraInstance.CompileFromFiles(ruleFilenames, null);
+                }
             }
             catch (Exception)
             {
@@ -147,14 +182,21 @@ namespace AVFramework
             }
         }
 
+        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ScanPG.Value += 1;
+        }
+
         private void DisplayRulesLoad()
         {
             string[] loadingAnimation = { "[\\]", "[|]", "[/]", "[--]" };
             int i = 0;
             CurrentTask.Text = "Loading virus signature database, please wait...";
-            Task.Run(LoadRules);
-            LoadRules();
-            while (!LoadRules().IsCompleted)
+
+            Thread thread = new Thread(new ThreadStart(LoadRules));
+            thread.Start();
+            //LoadRules();
+            while (thread.IsAlive)
             {
                 CurrentTask.Text = "Loading virus signature database, please wait..." + loadingAnimation[i];
                 i++;
@@ -163,6 +205,8 @@ namespace AVFramework
                     i = 0;
                 }
             }
+            thread.Join();
+            
         }
 
         private void AutoRunCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -179,6 +223,71 @@ namespace AVFramework
         {
             ReportVirusWindow reportVirusWindow = new ReportVirusWindow();
             reportVirusWindow.ShowDialog();
+        }
+
+        private void StartListeningForFlashDrive()
+        {
+            // Создаем новый экземпляр класса ManagementEventWatcher
+            ManagementEventWatcher watcher = new ManagementEventWatcher();
+
+            // Указываем запрос WMI для отслеживания подключения флешек
+            WqlEventQuery query = new WqlEventQuery("SELECT * FROM Win32_VolumeChangeEvent WHERE EventType = 2");
+
+            // Устанавливаем запрос для watcher
+            watcher.Query = query;
+
+            // Добавляем обработчик события
+            watcher.EventArrived += new EventArrivedEventHandler(HandleEvent);
+
+            // Начинаем отслеживание
+            watcher.Start();
+        }
+
+        private void HandleEvent(object sender, EventArrivedEventArgs e)
+        {
+            // Получаем информацию о подключенном устройстве
+            //ManagementBaseObject obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
+            //string driveName = obj["DriveName"].ToString();
+
+            DriveInfo[] drives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo drive in drives)
+            {
+                if (drive.DriveType == DriveType.Removable)
+                {
+                    ScanFlashDrive(drive.Name);
+                }
+            }
+
+
+            // Проверяем, является ли подключенное устройство флешкой (можно добавить дополнительные проверки)
+            //if (driveName.StartsWith("D:") || driveName.StartsWith("E:") || driveName.StartsWith("F:"))
+            //{
+            //    // Запускаем сканирование
+
+            //}
+        }
+
+        private void ScanFlashDrive(string driveName)
+        {
+            // Например, можно использовать стороннюю библиотеку или вызвать внешнюю программу для сканирования
+            // Например, для запуска внешней программы можно использовать класс Process:
+            // Process.Start("путь_к_вашей_программе_сканирования", driveName);
+
+
+#if WINDOWS10_0_17763_0_OR_GREATER
+     new ToastContentBuilder()
+            .AddText($"Сканирование флешки {driveName} запущено!")
+            .AddText("Check this out, The Enchantments in Washington!")
+            .Show();           
+#endif
+
+            // Здесь просто пример вывода сообщения о сканировании
+            //// Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+            //new ToastContentBuilder()
+            //.AddText($"Сканирование флешки {driveName} запущено!")
+            //.AddText("Check this out, The Enchantments in Washington!")
+            //.Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
         }
     }
 }

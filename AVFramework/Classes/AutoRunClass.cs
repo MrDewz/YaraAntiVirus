@@ -20,11 +20,11 @@ namespace AVFramework.Classes
 
         public bool IsAutoRun()
         {
-            var status = RegistryIsEnable.GetValue(Name) as byte[];
-            if (status[0] == 2)
+            //var status = RegistryIsEnable.GetValue(Name) as byte[];
+            //if (status[0] == 2)
                 //&& RegistryKey.GetValue(Name) == true)
                 return true;
-            else
+            //else
                 return false;
         }
 
@@ -32,15 +32,15 @@ namespace AVFramework.Classes
         {
             try
             {
-                var status = RegistryIsEnable.GetValue(Name) as byte[];
+                //var status = RegistryIsEnable.GetValue(Name) as byte[];
                 if (!autorun)
                     RegistryKey.DeleteValue(Name);
                 else
                     if (RegistryKey.GetValue(Name) == null)
                 {
                     RegistryKey.SetValue(Name, ExePath);
-                    status[0] = 2;
-                    RegistryIsEnable.SetValue(Name, status);
+                    //status[0] = 2;
+                    //RegistryIsEnable.SetValue(Name, status);
                 }
                     
                 else
