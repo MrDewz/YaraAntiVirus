@@ -12,8 +12,8 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Management;
 using YaraSharp;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Window = System.Windows.Window;
+using MessageBox = System.Windows.MessageBox;
 
 namespace AVFramework
 {
@@ -22,6 +22,8 @@ namespace AVFramework
     /// </summary>
     public partial class MainWindow : Window
     {
+        WindowState prevState;
+
         private static string BaseDirectory = Environment.CurrentDirectory;
 
         private static List<string> ruleFilenames;
@@ -51,6 +53,7 @@ namespace AVFramework
             InitializeComponent();
             ruleFilenames = Directory.GetFiles(Path.Combine(BaseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
             AutoRunCheckBox.IsChecked = AutoRun.IsAutoRun();
+            StartListeningForFlashDrive();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -195,7 +198,7 @@ namespace AVFramework
 
             Thread thread = new Thread(new ThreadStart(LoadRules));
             thread.Start();
-            //LoadRules();
+
             while (thread.IsAlive)
             {
                 CurrentTask.Text = "Loading virus signature database, please wait..." + loadingAnimation[i];
@@ -205,8 +208,7 @@ namespace AVFramework
                     i = 0;
                 }
             }
-            thread.Join();
-            
+            thread.Join();           
         }
 
         private void AutoRunCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -245,10 +247,6 @@ namespace AVFramework
 
         private void HandleEvent(object sender, EventArrivedEventArgs e)
         {
-            // Получаем информацию о подключенном устройстве
-            //ManagementBaseObject obj = (ManagementBaseObject)e.NewEvent["TargetInstance"];
-            //string driveName = obj["DriveName"].ToString();
-
             DriveInfo[] drives = DriveInfo.GetDrives();
 
             foreach (DriveInfo drive in drives)
@@ -258,14 +256,6 @@ namespace AVFramework
                     ScanFlashDrive(drive.Name);
                 }
             }
-
-
-            // Проверяем, является ли подключенное устройство флешкой (можно добавить дополнительные проверки)
-            //if (driveName.StartsWith("D:") || driveName.StartsWith("E:") || driveName.StartsWith("F:"))
-            //{
-            //    // Запускаем сканирование
-
-            //}
         }
 
         private void ScanFlashDrive(string driveName)
@@ -273,21 +263,52 @@ namespace AVFramework
             // Например, можно использовать стороннюю библиотеку или вызвать внешнюю программу для сканирования
             // Например, для запуска внешней программы можно использовать класс Process:
             // Process.Start("путь_к_вашей_программе_сканирования", driveName);
+            try
+            {
+                testfiles = null;
+                testfiles = DiskSearcher.GetAllFiles(driveName);
+                if (testfiles == null)
+                {
+                    throw new Exception("testfiles is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return;
+            }
 
+            Dispatcher.Invoke(() =>
+            {
+                ScanPG.Maximum = testfiles.Count;
+                DisplayRulesLoad();
 
-#if WINDOWS10_0_17763_0_OR_GREATER
-     new ToastContentBuilder()
-            .AddText($"Сканирование флешки {driveName} запущено!")
-            .AddText("Check this out, The Enchantments in Washington!")
-            .Show();           
-#endif
+                BackgroundWorker worker = new BackgroundWorker();
+                worker.WorkerReportsProgress = true;
+                worker.DoWork += Scan;
+                worker.ProgressChanged += worker_ProgressChanged;
+                worker.RunWorkerAsync();
+            });
+           
+        }
 
-            // Здесь просто пример вывода сообщения о сканировании
-            //// Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-            //new ToastContentBuilder()
-            //.AddText($"Сканирование флешки {driveName} запущено!")
-            //.AddText("Check this out, The Enchantments in Washington!")
-            //.Show(); // Not seeing the Show() method? Make sure you have version 7.0, and if you're using .NET 6 (or later), then your TFM must be net6.0-windows10.0.17763.0 or greater
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+                Hide();
+            else
+                prevState = WindowState;
+        }
+
+        private void TaskbarIcon_TrayLeftMouseDown(object sender, RoutedEventArgs e)
+        {
+            Show();
+            WindowState = prevState;
+        }
+
+        private void TaskBarClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }
