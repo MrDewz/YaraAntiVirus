@@ -8,30 +8,12 @@ namespace AVFramework
 {
     public class YaraScanner
     {
-        //private YSCompiler _compiler;
-        //private YSContext _context;
-        //private YSInstance _yaraInstance = new YSInstance();
 
-        //public YaraScanner()
-        //{
-
-        //_compiler = _yaraInstance.CompileFromFiles(ruleFilenames, externals);
-        //LoadRules(ruleFiles);
-        //_context = new YSContext();
-        //}
-
-        //public void LoadRules(string[] ruleFiles)
-        //{
-        //    foreach (var ruleFile in ruleFiles)
-        //    {
-        //        _compiler.AddFile(ruleFile);              
-        //    }
-        //}
-
+        //Memory Leak
         public bool ScanFile(string filePath, YSCompiler compiler)
         {
             //YSReport compilerErrors = _compiler.GetErrors();
-            YSReport compilerWarnings = compiler.GetWarnings();
+            //YSReport compilerWarnings = compiler.GetWarnings();
             YSScanner scanner = new YSScanner(compiler.GetRules(), null);
             var results = scanner.ScanFile(filePath);
             //var f = scanner.ScanFile(filePath);

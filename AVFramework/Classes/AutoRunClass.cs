@@ -18,36 +18,45 @@ namespace AVFramework.Classes
             Name = name;
         }
 
+        public void DeleteAutoRun()
+        {
+            RegistryKey.DeleteValue(Name, false);
+        }
+
         public bool IsAutoRun()
         {
-            //var status = RegistryIsEnable.GetValue(Name) as byte[];
-            //if (status[0] == 2)
+            var status = RegistryIsEnable.GetValue(Name) as byte[];
+            //var status2 = RegistryKey.GetValue(Name);
+            if (status[0] == 2)
                 //&& RegistryKey.GetValue(Name) == true)
                 return true;
-            //else
+            else
                 return false;
         }
 
-        public void SetAutoRun(bool autorun)
+        public void SetAutoRun(bool enable)
         {
             try
             {
-                //var status = RegistryIsEnable.GetValue(Name) as byte[];
-                if (!autorun)
-                    RegistryKey.DeleteValue(Name);
-                else
-                    if (RegistryKey.GetValue(Name) == null)
-                {
+                if (RegistryKey.GetValue(Name) == null)
                     RegistryKey.SetValue(Name, ExePath);
-                    //status[0] = 2;
-                    //RegistryIsEnable.SetValue(Name, status);
+
+                var status = RegistryIsEnable.GetValue(Name) as byte[];
+
+                if (enable)
+                {
+                    status[0] = 2;
+                    RegistryIsEnable.SetValue(Name, status);
+                }
+
+                else
+                {                   
+                    status[0] = 3;
+                    RegistryIsEnable.SetValue(Name, status);
                 }
                     
-                else
-                    return;
-
                 RegistryKey.Flush();
-               // RegistryKey.Close();
+                //RegistryKey.Close();
             }
             catch (Exception)
             {

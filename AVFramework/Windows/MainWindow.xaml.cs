@@ -22,7 +22,7 @@ namespace AVFramework
     /// </summary>
     public partial class MainWindow : Window
     {
-        WindowState prevState;
+        private bool isDelete = false;
 
         private static string BaseDirectory = Environment.CurrentDirectory;
 
@@ -32,27 +32,21 @@ namespace AVFramework
 
         private static List<string> ProbableViruses = new List<string>();
 
-        //Dictionary<string, object> externals = new Dictionary<string, object>()
-        //    {
-        //        { "filename", string.Empty },
-        //        { "filepath", string.Empty },
-        //        { "extension", string.Empty }
-        //    };
-        YSInstance YaraInstance = new YSInstance();
+        WindowState prevState;
+
+        YSInstance yaraInstance = new YSInstance();//вызывает MemoryLeak
 
         YSContext context = new YSContext();
 
-        YSCompiler Compiler = new YSCompiler(null);
+        YSCompiler compiler = new YSCompiler(null);        
 
-        
-
-        AutoRunClass AutoRun = new AutoRunClass("YaraScanner");
+        AutoRunClass autoRun = new AutoRunClass("YaraScanner");
 
         public MainWindow()
         {
             InitializeComponent();
             ruleFilenames = Directory.GetFiles(Path.Combine(BaseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
-            AutoRunCheckBox.IsChecked = AutoRun.IsAutoRun();
+            AutoRunCheckBox.IsChecked = autoRun.IsAutoRun();
             StartListeningForFlashDrive();
         }
 
@@ -74,7 +68,7 @@ namespace AVFramework
                         LogBox.Document.Blocks.Clear();
                         testfiles = Directory.GetFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
                         ScanPG.Maximum = testfiles.Count;
-                        System.Windows.MessageBox.Show("Files found: " + testfiles.Count.ToString(), "Message");
+                        MessageBox.Show("Files found: " + testfiles.Count.ToString(), "Message");
                         DisplayRulesLoad();
 
                         BackgroundWorker worker = new BackgroundWorker();
@@ -83,13 +77,12 @@ namespace AVFramework
                         worker.ProgressChanged += worker_ProgressChanged;
                         worker.RunWorkerAsync();
 
-                        //Scan();
                     }
                 }
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Ошибка");
+                MessageBox.Show("Ошибка");
                 Logging.ErrorLog(ex);
                 throw;
             }
@@ -112,21 +105,18 @@ namespace AVFramework
                     ScanPG.Maximum = testfiles.Count;
                     DisplayRulesLoad();
 
-
                     BackgroundWorker worker = new BackgroundWorker();
                     worker.WorkerReportsProgress = true;
                     worker.DoWork += Scan;
                     worker.ProgressChanged += worker_ProgressChanged;
                     worker.RunWorkerAsync();
-
-                    //Scan();
                 }
             }
         }
 
         private void Scan(object sender, DoWorkEventArgs e)
         {
-            //progress bar реализовать с помощью backgroundWorker => https://wpf-tutorial.com/ru/65/дополнительные-элементы/элемент-управления-progressbar/
+           
             try
             {
                 YaraScanner yaraScanner = new YaraScanner();
@@ -138,7 +128,7 @@ namespace AVFramework
                         CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
                     });
 
-                    bool result = yaraScanner.ScanFile(testfiles[i], Compiler);
+                    bool result = yaraScanner.ScanFile(testfiles[i], compiler);
 
                     Dispatcher.Invoke(() =>
                     {
@@ -152,18 +142,18 @@ namespace AVFramework
                         ProbableViruses.Add(testfiles[i]);
                     }
                 }
-                System.Windows.MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
+                MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
                 if (ProbableViruses.Count > 0)
                 {
                     DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
                     detectedVirusesWindow.Show();
                 }
-                Compiler.Dispose();
+                compiler.Dispose();
 
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show("Ошибка сканирования");
+                MessageBox.Show("Ошибка сканирования");
                 Logging.ErrorLog(ex);
                 throw;
             }
@@ -173,14 +163,14 @@ namespace AVFramework
         {
             try
             {
-                if (Compiler != null)
+                if (compiler != null)
                 {
-                    Compiler = YaraInstance.CompileFromFiles(ruleFilenames, null);
+                    compiler = yaraInstance.CompileFromFiles(ruleFilenames, null);
                 }
             }
             catch (Exception)
             {
-                System.Windows.MessageBox.Show("Ошибка загрузки сигнатур");
+                MessageBox.Show("Ошибка загрузки сигнатур");
                 throw;
             }
         }
@@ -194,7 +184,11 @@ namespace AVFramework
         {
             string[] loadingAnimation = { "[\\]", "[|]", "[/]", "[--]" };
             int i = 0;
-            CurrentTask.Text = "Loading virus signature database, please wait...";
+
+            Dispatcher.Invoke(() =>
+            {
+                CurrentTask.Text = "Loading virus signature database, please wait...";
+            });
 
             Thread thread = new Thread(new ThreadStart(LoadRules));
             thread.Start();
@@ -213,12 +207,29 @@ namespace AVFramework
 
         private void AutoRunCheckBox_Checked(object sender, RoutedEventArgs e)
         {
-            AutoRun.SetAutoRun(true);
+            autoRun.SetAutoRun(true);
         }
 
         private void AutoRunCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
-            AutoRun.SetAutoRun(false);
+            if (isDelete)
+            {
+                isDelete = false;
+                return;
+            }
+            autoRun.SetAutoRun(false);
+        }
+
+        private void DeleteAutoRunBtn_Click(object sender, RoutedEventArgs e)
+        {
+            autoRun.DeleteAutoRun();
+
+            if (AutoRunCheckBox.IsChecked == true)
+            {
+                isDelete = true;
+                AutoRunCheckBox.IsChecked = false;
+            }    
+            MessageBox.Show("Успешно удалено!");
         }
 
         private void VirusReport_Click(object sender, RoutedEventArgs e)

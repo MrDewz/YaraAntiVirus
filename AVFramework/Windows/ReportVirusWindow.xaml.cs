@@ -40,6 +40,7 @@ namespace AVFramework.Windows
                 {
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
+                    FilePath = filePath;
                     CurrentFile.Text += filePath;
                     CurrentFile.Visibility = Visibility.Visible;
                 } 
@@ -55,10 +56,12 @@ namespace AVFramework.Windows
                 if (string.IsNullOrWhiteSpace(FilePath))
                 {
                     MessageBox.Show("Пожалуйста выберите файл!");
+                    return;
                 }
                 if (string.IsNullOrWhiteSpace(description))
                 {
                     MessageBox.Show("Пожалуйста опишите причину!");
+                    return;
                 }
                 else
                 {
