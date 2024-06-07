@@ -37,22 +37,31 @@ namespace AVFramework.Windows
             Button button = sender as Button;
             int index = VirusesLB.Items.IndexOf(button.DataContext);
             VirusesLB.Items.RemoveAt(index);
-            File.Delete(ProbableViruses.ElementAt(index).Value);           
+            ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
+            File.Delete(ProbableViruses.ElementAt(index).Value);
             MessageBox.Show("Файл удален");
             Event(1, index);
         }
 
         private void RemainButtonClick_Click(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            int index = VirusesLB.Items.IndexOf(button.DataContext);
-            
-            if (MessageBox.Show("Вы уверены что хотите оставить данный файл?", "Действие с файлом", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes )
+            try
             {
-                VirusesLB.Items.RemoveAt(index);
-                MessageBox.Show("Файл занесен в список разрешенных!");
-                File.AppendAllText("WhiteList.txt", ProbableViruses.ElementAt(index).Value + "\n");
-                Event(2,index);
+                Button button = sender as Button;
+                int index = VirusesLB.Items.IndexOf(button.DataContext);
+
+                if (MessageBox.Show("Вы уверены что хотите оставить данный файл?", "Действие с файлом", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+                {
+                    VirusesLB.Items.RemoveAt(index);
+                    ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
+                    MessageBox.Show("Файл занесен в список разрешенных!");
+                    File.AppendAllText("WhiteList.txt", ProbableViruses.ElementAt(index).Value + "\n");
+                    Event(2, index);
+                }
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Не удалось удалить!");
             }
         }
 
@@ -87,7 +96,7 @@ namespace AVFramework.Windows
             {
                 MessageBox.Show("Ошибка записи в базу данных");
             }
-            
+
         }
     }
 }

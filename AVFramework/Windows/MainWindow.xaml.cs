@@ -5,15 +5,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Management;
+using System.Threading;
+using System.Windows;
+using System.Windows.Forms;
 using YaraSharp;
-using Window = System.Windows.Window;
 using MessageBox = System.Windows.MessageBox;
+using Window = System.Windows.Window;
 
 namespace AVFramework
 {
@@ -38,7 +36,7 @@ namespace AVFramework
 
         YSContext context = new YSContext();
 
-        YSCompiler compiler = new YSCompiler(null);        
+        YSCompiler compiler = new YSCompiler(null);
 
         AutoRunClass autoRun = new AutoRunClass("YaraScanner");
 
@@ -65,10 +63,11 @@ namespace AVFramework
 
                     if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(openFolderDialog.SelectedPath))
                     {
+                        CurrentTask.Text = "Loading virus signature database, please wait...";
                         LogBox.Document.Blocks.Clear();
                         testfiles = Directory.GetFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
                         ScanPG.Maximum = testfiles.Count;
-                        MessageBox.Show("Files found: " + testfiles.Count.ToString(), "Message");
+                        MessageBox.Show("Файлов найдено: " + testfiles.Count.ToString(), "Сообщение");
                         DisplayRulesLoad();
 
                         BackgroundWorker worker = new BackgroundWorker();
@@ -100,6 +99,7 @@ namespace AVFramework
 
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
+                    CurrentTask.Text = "Loading virus signature database, please wait...";
                     //Get the path of specified file
                     testfiles = openFileDialog.FileNames.ToList();
                     ScanPG.Maximum = testfiles.Count;
@@ -116,7 +116,7 @@ namespace AVFramework
 
         private void Scan(object sender, DoWorkEventArgs e)
         {
-           
+
             try
             {
                 YaraScanner yaraScanner = new YaraScanner();
@@ -154,7 +154,7 @@ namespace AVFramework
                     });
                 }
                 compiler.Dispose();
-                
+
             }
             catch (Exception ex)
             {
@@ -207,7 +207,7 @@ namespace AVFramework
                     i = 0;
                 }
             }
-            thread.Join();           
+            thread.Join();
         }
 
         private void AutoRunCheckBox_Checked(object sender, RoutedEventArgs e)
@@ -233,7 +233,7 @@ namespace AVFramework
             {
                 isDelete = true;
                 AutoRunCheckBox.IsChecked = false;
-            }    
+            }
             MessageBox.Show("Успешно удалено!");
         }
 
@@ -305,7 +305,7 @@ namespace AVFramework
                 worker.ProgressChanged += worker_ProgressChanged;
                 worker.RunWorkerAsync();
             });
-           
+
         }
 
         private void Window_StateChanged(object sender, EventArgs e)
@@ -324,7 +324,7 @@ namespace AVFramework
 
         private void TaskBarClose_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
     }
 }

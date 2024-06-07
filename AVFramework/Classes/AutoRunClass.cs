@@ -7,7 +7,7 @@ namespace AVFramework.Classes
     public class AutoRunClass
     {
         RegistryKey RegistryKey = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run");
-        
+
         RegistryKey RegistryIsEnable = Registry.CurrentUser.CreateSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\StartupApproved\\Run");
         string ExePath = Assembly.GetExecutingAssembly().Location;
 
@@ -50,11 +50,11 @@ namespace AVFramework.Classes
                 }
 
                 else
-                {                   
+                {
                     status[0] = 3;
                     RegistryIsEnable.SetValue(Name, status);
                 }
-                    
+
                 RegistryKey.Flush();
                 //RegistryKey.Close();
             }
