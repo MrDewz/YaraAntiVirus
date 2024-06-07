@@ -30,7 +30,7 @@ namespace AVFramework
 
         private static List<string> testfiles;
 
-        private static List<string> ProbableViruses = new List<string>();
+        private static Dictionary<List<YSMatches>, string> ProbableViruses = new Dictionary<List<YSMatches>, string>();
 
         WindowState prevState;
 
@@ -128,28 +128,33 @@ namespace AVFramework
                         CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
                     });
 
-                    bool result = yaraScanner.ScanFile(testfiles[i], compiler);
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        LogBox.AppendText($"File {testfiles[i]} is {result} virus\n");
-                    });
+                    var result = yaraScanner.ScanFile(testfiles[i], compiler);
+                    bool resultBool = false;
 
                     (sender as BackgroundWorker).ReportProgress(i);
 
-                    if (result)
+                    if (result.Count > 0)
                     {
-                        ProbableViruses.Add(testfiles[i]);
+                        ProbableViruses.Add(result, testfiles[i]);
+                        resultBool = true;
                     }
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        LogBox.AppendText($"File {testfiles[i]} is {resultBool} virus\n");
+                    });
                 }
                 MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
                 if (ProbableViruses.Count > 0)
                 {
-                    DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
-                    detectedVirusesWindow.Show();
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
+                        detectedVirusesWindow.Show();
+                    });
                 }
                 compiler.Dispose();
-
+                
             }
             catch (Exception ex)
             {

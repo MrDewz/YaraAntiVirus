@@ -12,12 +12,18 @@ namespace AVFramework.Entity
     using System;
     using System.Collections.Generic;
     
-    public partial class VirusFound
+    public partial class actions
     {
-        public int Id { get; set; }
-        public string ComputerName { get; set; }
-        public string Ip { get; set; }
-        public Nullable<System.DateTime> DateTime { get; set; }
-        public string RuleName { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public actions()
+        {
+            this.events = new HashSet<events>();
+        }
+    
+        public int id { get; set; }
+        public string name { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<events> events { get; set; }
     }
 }

@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="Хранилище YaraScannerModel" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="actions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="administrators">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="login" Type="nvarchar" MaxLength="150" />
+          <Property Name="password" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="computers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="100" />
+          <Property Name="person" Type="nvarchar" MaxLength="150" />
+          <Property Name="inventory_number" Type="int" />
+          <Property Name="location" Type="nvarchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="events">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="computer_id" Type="int" />
+          <Property Name="event_date" Type="datetime" />
+          <Property Name="virus_id" Type="int" />
+          <Property Name="ip_address" Type="nvarchar" MaxLength="100" />
+          <Property Name="action_id" Type="int" />
+        </EntityType>
+        <EntityType Name="viruses">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="name" Type="nvarchar" MaxLength="100" />
+          <Property Name="description" Type="nvarchar(max)" />
+          <Property Name="type_id" Type="int" />
+        </EntityType>
+        <EntityType Name="viruses_types">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="350" />
+        </EntityType>
+        <Association Name="FK__events__computer__4E88ABD4">
+          <End Role="computers" Type="Self.computers" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="computers">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="computer_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__events__virus_id__4F7CD00D">
+          <End Role="viruses" Type="Self.viruses" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="viruses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="virus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_events_actions">
+          <End Role="actions" Type="Self.actions" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="actions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="action_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_viruses_types">
+          <End Role="viruses_types" Type="Self.viruses_types" Multiplicity="0..1" />
+          <End Role="viruses" Type="Self.viruses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="viruses_types">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="viruses">
+              <PropertyRef Name="type_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="Хранилище YaraScannerModelContainer">
+          <EntitySet Name="actions" EntityType="Self.actions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="administrators" EntityType="Self.administrators" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="computers" EntityType="Self.computers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="events" EntityType="Self.events" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="viruses" EntityType="Self.viruses" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="viruses_types" EntityType="Self.viruses_types" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__events__computer__4E88ABD4" Association="Self.FK__events__computer__4E88ABD4">
+            <End Role="computers" EntitySet="computers" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK__events__virus_id__4F7CD00D" Association="Self.FK__events__virus_id__4F7CD00D">
+            <End Role="viruses" EntitySet="viruses" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK_events_actions" Association="Self.FK_events_actions">
+            <End Role="actions" EntitySet="actions" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK_viruses_types" Association="Self.FK_viruses_types">
+            <End Role="viruses_types" EntitySet="viruses_types" />
+            <End Role="viruses" EntitySet="viruses" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="YaraScannerModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="actions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="events" Relationship="Self.FK_events_actions" FromRole="actions" ToRole="events" />
+        </EntityType>
+        <EntityType Name="administrators">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="login" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="password" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="computers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="person" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="inventory_number" Type="Int32" />
+          <Property Name="location" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="events" Relationship="Self.FK__events__computer__4E88ABD4" FromRole="computers" ToRole="events" />
+        </EntityType>
+        <EntityType Name="events">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="computer_id" Type="Int32" />
+          <Property Name="event_date" Type="DateTime" Precision="3" />
+          <Property Name="virus_id" Type="Int32" />
+          <Property Name="ip_address" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="action_id" Type="Int32" />
+          <NavigationProperty Name="actions" Relationship="Self.FK_events_actions" FromRole="events" ToRole="actions" />
+          <NavigationProperty Name="computers" Relationship="Self.FK__events__computer__4E88ABD4" FromRole="events" ToRole="computers" />
+          <NavigationProperty Name="viruses" Relationship="Self.FK__events__virus_id__4F7CD00D" FromRole="events" ToRole="viruses" />
+        </EntityType>
+        <EntityType Name="viruses">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="name" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="type_id" Type="Int32" />
+          <NavigationProperty Name="events" Relationship="Self.FK__events__virus_id__4F7CD00D" FromRole="viruses" ToRole="events" />
+          <NavigationProperty Name="viruses_types" Relationship="Self.FK_viruses_types" FromRole="viruses" ToRole="viruses_types" />
+        </EntityType>
+        <EntityType Name="viruses_types">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="350" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="viruses" Relationship="Self.FK_viruses_types" FromRole="viruses_types" ToRole="viruses" />
+        </EntityType>
+        <Association Name="FK_events_actions">
+          <End Role="actions" Type="Self.actions" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="actions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="action_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__events__computer__4E88ABD4">
+          <End Role="computers" Type="Self.computers" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="computers">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="computer_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__events__virus_id__4F7CD00D">
+          <End Role="viruses" Type="Self.viruses" Multiplicity="0..1" />
+          <End Role="events" Type="Self.events" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="viruses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="events">
+              <PropertyRef Name="virus_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_viruses_types">
+          <End Role="viruses_types" Type="Self.viruses_types" Multiplicity="0..1" />
+          <End Role="viruses" Type="Self.viruses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="viruses_types">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="viruses">
+              <PropertyRef Name="type_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="YaraScannerEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="actions" EntityType="Self.actions" />
+          <EntitySet Name="administrators" EntityType="Self.administrators" />
+          <EntitySet Name="computers" EntityType="Self.computers" />
+          <EntitySet Name="events" EntityType="Self.events" />
+          <EntitySet Name="viruses" EntityType="Self.viruses" />
+          <EntitySet Name="viruses_types" EntityType="Self.viruses_types" />
+          <AssociationSet Name="FK_events_actions" Association="Self.FK_events_actions">
+            <End Role="actions" EntitySet="actions" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK__events__computer__4E88ABD4" Association="Self.FK__events__computer__4E88ABD4">
+            <End Role="computers" EntitySet="computers" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK__events__virus_id__4F7CD00D" Association="Self.FK__events__virus_id__4F7CD00D">
+            <End Role="viruses" EntitySet="viruses" />
+            <End Role="events" EntitySet="events" />
+          </AssociationSet>
+          <AssociationSet Name="FK_viruses_types" Association="Self.FK_viruses_types">
+            <End Role="viruses_types" EntitySet="viruses_types" />
+            <End Role="viruses" EntitySet="viruses" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="Хранилище YaraScannerModelContainer" CdmEntityContainer="YaraScannerEntities">
+          <EntitySetMapping Name="actions">
+            <EntityTypeMapping TypeName="YaraScannerModel.actions">
+              <MappingFragment StoreEntitySet="actions">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="administrators">
+            <EntityTypeMapping TypeName="YaraScannerModel.administrators">
+              <MappingFragment StoreEntitySet="administrators">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="login" ColumnName="login" />
+                <ScalarProperty Name="password" ColumnName="password" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="computers">
+            <EntityTypeMapping TypeName="YaraScannerModel.computers">
+              <MappingFragment StoreEntitySet="computers">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="person" ColumnName="person" />
+                <ScalarProperty Name="inventory_number" ColumnName="inventory_number" />
+                <ScalarProperty Name="location" ColumnName="location" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="events">
+            <EntityTypeMapping TypeName="YaraScannerModel.events">
+              <MappingFragment StoreEntitySet="events">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="computer_id" ColumnName="computer_id" />
+                <ScalarProperty Name="event_date" ColumnName="event_date" />
+                <ScalarProperty Name="virus_id" ColumnName="virus_id" />
+                <ScalarProperty Name="ip_address" ColumnName="ip_address" />
+                <ScalarProperty Name="action_id" ColumnName="action_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="viruses">
+            <EntityTypeMapping TypeName="YaraScannerModel.viruses">
+              <MappingFragment StoreEntitySet="viruses">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="name" ColumnName="name" />
+                <ScalarProperty Name="description" ColumnName="description" />
+                <ScalarProperty Name="type_id" ColumnName="type_id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="viruses_types">
+            <EntityTypeMapping TypeName="YaraScannerModel.viruses_types">
+              <MappingFragment StoreEntitySet="viruses_types">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

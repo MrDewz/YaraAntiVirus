@@ -1,6 +1,9 @@
 ﻿using AVFramework;
 using AVFramework.Classes;
 using AVFramework.Entity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using YaraSharp;
 
@@ -10,38 +13,24 @@ namespace AVFramework
     {
 
         //Memory Leak
-        public bool ScanFile(string filePath, YSCompiler compiler)
+        public List<YSMatches> ScanFile(string filePath, YSCompiler compiler)
         {
-            //YSReport compilerErrors = _compiler.GetErrors();
-            //YSReport compilerWarnings = compiler.GetWarnings();
+
             YSScanner scanner = new YSScanner(compiler.GetRules(), null);
-            var results = scanner.ScanFile(filePath);
-            //var f = scanner.ScanFile(filePath);
-            bool result = results.Any(r => r.Rule.Identifier == "WarningRule");
-
-            if (result)
-            { 
-                // добавление данных
-                using (YaraAVEntities db = new YaraAVEntities())
+            List<YSMatches> results = scanner.ScanFile(filePath);
+            //bool result = results.Any(r => r.Rule.Identifier == "WarningRule");
+            FileInfo fileInfo = new FileInfo("WhiteList.txt");
+            if (results.Count > 0 && fileInfo.Exists) {
+                
+                var all = System.IO.File.ReadLines("WhiteList.txt");
+                if (all.Contains(filePath))
                 {
-                    ComputerInfo infoComputer = new ComputerInfo();
-                    infoComputer = InfoComputer.GetComputerInfo();
-                    VirusFound VirusFound = new VirusFound()
-                    {
-                        ComputerName = infoComputer.Name,
-                        Ip = infoComputer.IpAddress,
-                        DateTime = infoComputer.Time,
-                        RuleName = results[0].Rule.Strings.ToString()
-                    }; 
-
-                    // добавляем их в бд
-                    db.VirusFound.Add(VirusFound);
-                    db.SaveChanges();
+                    results.Clear();
                 }
             }
             scanner.Dispose();
             //_compiler.Dispose();
-            return result;
+            return results;
 
         }
     }
