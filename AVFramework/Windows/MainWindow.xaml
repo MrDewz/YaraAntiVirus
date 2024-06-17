@@ -22,16 +22,17 @@
             <Menu>
                 <MenuItem Header="Настройки">
                     <CheckBox x:Name="AutoRunCheckBox" Content="Автозапуск приложения" Checked="AutoRunCheckBox_Checked" Unchecked="AutoRunCheckBox_Unchecked"></CheckBox>
+                    <MenuItem x:Name="AdminAuthBtn" Header="Зарегестрировать компьютер" Click="AdminAuthBtn_Click"></MenuItem>
                     <Separator></Separator>
                     <MenuItem x:Name="DeleteAutoRunBtn" Header="Удалить из автозагрузки" Click="DeleteAutoRunBtn_Click"></MenuItem>
                 </MenuItem>
-                <MenuItem x:Name="VirusReport" Header="Зарепортить вирус" Click="VirusReport_Click"></MenuItem>
+                <MenuItem x:Name="VirusReport" Header="Отправить файл разработчику" Click="VirusReport_Click"></MenuItem>
             </Menu>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Style="{StaticResource RoundButton}" Width="150" Height="40" Click="Button_Click">Сканировать папку</Button>
                 <Button x:Name="ChooseFileBtn" Style="{StaticResource RoundButton}" Width="150" Height="40" Click="ChooseFileBtn_Click">Сканировать файл</Button>
             </StackPanel>
-            <ProgressBar x:Name="ScanPG" Minimum="0" Value="0" Height="25" />
+            <ProgressBar x:Name="ScanPG" Minimum="0" Value="0" Height="25" Margin="5" />
             <TextBlock Name="CurrentTask" ></TextBlock>
             <RichTextBox x:Name="LogBox" Height="300" Margin="5"></RichTextBox><!--Заменить на StackPanel-->
 

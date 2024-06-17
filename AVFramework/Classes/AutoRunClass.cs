@@ -26,9 +26,10 @@ namespace AVFramework.Classes
         public bool IsAutoRun()
         {
             var status = RegistryIsEnable.GetValue(Name) as byte[];
-            //var status2 = RegistryKey.GetValue(Name);
+            if (status == null)
+                return false;
+
             if (status[0] == 2)
-                //&& RegistryKey.GetValue(Name) == true)
                 return true;
             else
                 return false;

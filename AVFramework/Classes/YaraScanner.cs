@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using YaraSharp;
 
 namespace AVFramework
@@ -14,7 +16,7 @@ namespace AVFramework
 
             YSScanner scanner = new YSScanner(compiler.GetRules(), null);
             List<YSMatches> results = scanner.ScanFile(filePath);
-            //bool result = results.Any(r => r.Rule.Identifier == "WarningRule");
+
             FileInfo fileInfo = new FileInfo("WhiteList.txt");
             if (results.Count > 0 && fileInfo.Exists)
             {
@@ -24,6 +26,7 @@ namespace AVFramework
                     results.Clear();
                 }
             }
+            
             scanner.Dispose();
 
             return results;

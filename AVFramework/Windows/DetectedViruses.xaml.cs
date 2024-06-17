@@ -34,13 +34,20 @@ namespace AVFramework.Windows
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            Button button = sender as Button;
-            int index = VirusesLB.Items.IndexOf(button.DataContext);
-            VirusesLB.Items.RemoveAt(index);
-            ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
-            File.Delete(ProbableViruses.ElementAt(index).Value);
-            MessageBox.Show("Файл удален");
-            Event(1, index);
+            try
+            {
+                Button button = sender as Button;
+                int index = VirusesLB.Items.IndexOf(button.DataContext);
+                VirusesLB.Items.RemoveAt(index);
+                File.Delete(ProbableViruses.ElementAt(index).Value);
+                MessageBox.Show("Файл удален");
+                //ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
+                Event(1, index);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Не удалось удалить! Возможно путь до файла изменился");
+            }
         }
 
         private void RemainButtonClick_Click(object sender, RoutedEventArgs e)
@@ -52,16 +59,15 @@ namespace AVFramework.Windows
 
                 if (MessageBox.Show("Вы уверены что хотите оставить данный файл?", "Действие с файлом", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    VirusesLB.Items.RemoveAt(index);
-                    ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
+                    VirusesLB.Items.RemoveAt(index);                    
                     MessageBox.Show("Файл занесен в список разрешенных!");
-                    File.AppendAllText("WhiteList.txt", ProbableViruses.ElementAt(index).Value + "\n");
+                    File.AppendAllText("WhiteList.txt", ProbableViruses.ElementAt(index).Value + "\n");                    
                     Event(2, index);
                 }
             }
             catch (Exception)
             {
-                MessageBox.Show("Не удалось удалить!");
+                MessageBox.Show("Не удалось разрешить!");
             }
         }
 
@@ -85,18 +91,16 @@ namespace AVFramework.Windows
                         event_date = infoComputer.Time,
                         action_id = action
                     };
-
+                    ProbableViruses.Remove(ProbableViruses.ElementAt(index).Key);
                     // добавляем их в бд
                     db.events.Add(newEvent);
                     db.SaveChanges();
                 }
-                ProbableViruses.Clear();
             }
             catch (Exception)
             {
                 MessageBox.Show("Ошибка записи в базу данных");
             }
-
         }
     }
 }

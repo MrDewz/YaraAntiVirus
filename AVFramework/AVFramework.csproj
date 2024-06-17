@@ -427,7 +427,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="AVFramework_TemporaryKey.pfx" />
     <EntityDeploy Include="Entity\AVModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>AVModel.Designer.cs</LastGenOutput>

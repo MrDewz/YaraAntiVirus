@@ -20,9 +20,11 @@ namespace AVFramework
     /// </summary>
     public partial class MainWindow : Window
     {
+        private bool firstScan = true;
+
         private bool isDelete = false;
 
-        private static string BaseDirectory = Environment.CurrentDirectory;
+        private static string baseDirectory = Environment.CurrentDirectory;
 
         private static List<string> ruleFilenames;
 
@@ -32,18 +34,19 @@ namespace AVFramework
 
         WindowState prevState;
 
-        YSInstance yaraInstance = new YSInstance();//вызывает MemoryLeak
+        YSInstance yaraInstance = new YSInstance();
 
-        YSContext context = new YSContext();
+        YSContext context = new YSContext();//вызывает MemoryLeak
 
         YSCompiler compiler = new YSCompiler(null);
+
 
         AutoRunClass autoRun = new AutoRunClass("YaraScanner");
 
         public MainWindow()
         {
             InitializeComponent();
-            ruleFilenames = Directory.GetFiles(Path.Combine(BaseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
+            ruleFilenames = Directory.EnumerateFiles(Path.Combine(baseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
             AutoRunCheckBox.IsChecked = autoRun.IsAutoRun();
             StartListeningForFlashDrive();
         }
@@ -65,7 +68,7 @@ namespace AVFramework
                     {
                         CurrentTask.Text = "Loading virus signature database, please wait...";
                         LogBox.Document.Blocks.Clear();
-                        testfiles = Directory.GetFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
+                        testfiles = Directory.EnumerateFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
                         ScanPG.Maximum = testfiles.Count;
                         MessageBox.Show("Файлов найдено: " + testfiles.Count.ToString(), "Сообщение");
                         DisplayRulesLoad();
@@ -119,7 +122,9 @@ namespace AVFramework
 
             try
             {
+                firstScan = false;
                 YaraScanner yaraScanner = new YaraScanner();
+
                 for (int i = 0; i < testfiles.Count; i++)
                 {
 
@@ -127,7 +132,7 @@ namespace AVFramework
                     {
                         CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
                     });
-
+                    
                     var result = yaraScanner.ScanFile(testfiles[i], compiler);
                     bool resultBool = false;
 
@@ -144,6 +149,7 @@ namespace AVFramework
                         LogBox.AppendText($"File {testfiles[i]} is {resultBool} virus\n");
                     });
                 }
+
                 MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
                 if (ProbableViruses.Count > 0)
                 {
@@ -152,9 +158,7 @@ namespace AVFramework
                         DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
                         detectedVirusesWindow.Show();
                     });
-                }
-                compiler.Dispose();
-
+                }                
             }
             catch (Exception ex)
             {
@@ -168,7 +172,7 @@ namespace AVFramework
         {
             try
             {
-                if (compiler != null)
+                if (firstScan)
                 {
                     compiler = yaraInstance.CompileFromFiles(ruleFilenames, null);
                 }
@@ -276,13 +280,11 @@ namespace AVFramework
 
         private void ScanFlashDrive(string driveName)
         {
-            // Например, можно использовать стороннюю библиотеку или вызвать внешнюю программу для сканирования
-            // Например, для запуска внешней программы можно использовать класс Process:
-            // Process.Start("путь_к_вашей_программе_сканирования", driveName);
             try
             {
                 testfiles = null;
-                testfiles = DiskSearcher.GetAllFiles(driveName);
+                testfiles = DiskSearcher.GetAllFiles(driveName);              
+
                 if (testfiles == null)
                 {
                     throw new Exception("testfiles is null");
@@ -325,6 +327,12 @@ namespace AVFramework
         private void TaskBarClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void AdminAuthBtn_Click(object sender, RoutedEventArgs e)
+        {
+            //ComputerRegistrationWindow computerRegistrationWindow = new ComputerRegistrationWindow();
+            //computerRegistrationWindow.ShowDialog();
         }
     }
 }
