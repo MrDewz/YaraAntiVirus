@@ -48,7 +48,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate>
-                        <Border CornerRadius="5" Background="{TemplateBinding Background}">
+                        <Border CornerRadius="10" Background="{TemplateBinding Background}">
                             <ContentPresenter Content="{Binding Path=Content, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}"
                                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
                         </Border>

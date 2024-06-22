@@ -10,7 +10,14 @@
         <StackPanel>
             <StackPanel Margin="5">
                 <TextBlock Style="{StaticResource NormBlock}">Выберите файл который хотите зарепортить:</TextBlock>
-                <Button x:Name="ChooseFileBtn" Style="{StaticResource RoundButton}" HorizontalAlignment="Left" Click="ChooseFileBtn_Click" Margin="5">Выбрать файл</Button>
+                <Button 
+                    x:Name="ChooseFileBtn" 
+                    Style="{StaticResource RoundButton}" 
+                    HorizontalAlignment="Left" 
+                    Click="ChooseFileBtn_Click" 
+                    Margin="5">
+                    Выбрать файл
+                </Button>
                 <TextBlock Name="CurrentFile" Text="Файл выбран: " Style="{StaticResource NormBlock}" Visibility="Collapsed"></TextBlock>
                 <TextBlock Style="{StaticResource NormBlock}">Пожалуйста опишите почему вы считаете этот файл вирусом:</TextBlock>
                 <RichTextBox x:Name="DescriptionRTB" Height="200" Margin="5"></RichTextBox>

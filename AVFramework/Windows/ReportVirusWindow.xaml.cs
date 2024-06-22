@@ -15,7 +15,6 @@ namespace AVFramework.Windows
         {
             InitializeComponent();
         }
-
         private void ChooseFileBtn_Click(object sender, RoutedEventArgs e)
         {
             string filePath;
@@ -36,7 +35,7 @@ namespace AVFramework.Windows
                 }
             }
         }
-
+        
         private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
             try
