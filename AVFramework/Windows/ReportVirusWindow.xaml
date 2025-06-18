@@ -334,90 +334,21 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
     <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="{Binding FileName}" 
-                                         Style="{StaticResource ModernTextBlock}"
-                                         VerticalAlignment="Center"/>
-                                <Button Grid.Column="1"
-                                        Content="Удалить"
-                                        Style="{StaticResource ModernButton}"
-                                        Click="RemoveFile_Click"
-                                        Tag="{Binding FileName}"
-                                        Margin="5,0,0,0"/>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <StackPanel Grid.Column="1" 
-                          Orientation="Vertical" 
-                          VerticalAlignment="Top">
-                    <Button x:Name="ChooseFileBtn"
-                            Content="Выбрать файлы"
-                            Style="{StaticResource ModernButton}"
-                            Click="ChooseFileBtn_Click"/>
-                    <Button x:Name="AddScreenshotBtn"
-                            Content="Добавить скриншот"
-                            Style="{StaticResource ModernButton}"
-                            Margin="0,5,0,0"
-                            Click="AddScreenshotBtn_Click"/>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-
-        <!-- Описание -->
-        <StackPanel Grid.Row="2" Margin="0,0,0,10">
-            <TextBlock Text="Описание проблемы:" Style="{StaticResource ModernTextBlock}"/>
-            <ComboBox x:Name="TemplateComboBox"
-                      Style="{StaticResource ModernComboBox}"
-                      Margin="0,5,0,10"
-                      SelectionChanged="TemplateComboBox_SelectionChanged">
-                <ComboBoxItem Content="Подозрительная активность"/>
-                <ComboBoxItem Content="Сетевая активность"/>
-                <ComboBoxItem Content="Неизвестный процесс"/>
-                <ComboBoxItem Content="Подозрительный файл"/>
-            </ComboBox>
-            <RichTextBox x:Name="DescriptionRTB"
-                         Style="{StaticResource ModernRichTextBox}"
-                         Height="150"
-                         VerticalScrollBarVisibility="Auto"/>
-        </StackPanel>
-
-        <!-- Прогресс и кнопки -->
-        <StackPanel Grid.Row="3">
-            <TextBlock x:Name="CurrentTask" 
-                      Text="Готов к отправке" 
-                      Style="{StaticResource ModernTextBlock}"
-                      Margin="0,0,0,5"/>
-            <ProgressBar x:Name="ProgressBar"
-                         Style="{StaticResource ModernProgressBar}"
-                         Height="4"
-                         Margin="0,0,0,10"/>
-            
-            <StackPanel Orientation="Horizontal" 
-                        HorizontalAlignment="Right">
-                <Button x:Name="SendBtn"
-                        Content="Отправить"
-                        Style="{StaticResource ModernButton}"
-                        Margin="10,0,0,0"
-                        Click="SendBtn_Click"/>
-                <Button x:Name="SaveDraftBtn"
-                        Content="Сохранить черновик"
-                        Style="{StaticResource ModernButton}"
-                        Margin="10,0,0,0"
-                        Click="SaveDraftBtn_Click"/>
-                <Button x:Name="AboutBtn"
-                        Content="О программе"
-                        Style="{StaticResource ModernButton}"
-                        Margin="10,0,0,0"
-                        Click="AboutBtn_Click"/>
-                <Button x:Name="CancelBtn"
-                        Content="Отмена"
-                        Style="{StaticResource ModernButton}"
-                        Margin="10,0,0,0"
-                        Click="CancelBtn_Click"/>
+        <StackPanel>
+            <StackPanel Margin="5">
+                <TextBlock Style="{StaticResource NormBlock}">Выберите файл который хотите зарепортить:</TextBlock>
+                <Button 
+                    x:Name="ChooseFileBtn" 
+                    Style="{StaticResource RoundButton}" 
+                    HorizontalAlignment="Left" 
+                    Click="ChooseFileBtn_Click" 
+                    Margin="5">
+                    Выбрать файл
+                </Button>
+                <TextBlock Name="CurrentFile" Text="Файл выбран: " Style="{StaticResource NormBlock}" Visibility="Collapsed"></TextBlock>
+                <TextBlock Style="{StaticResource NormBlock}">Пожалуйста опишите почему вы считаете этот файл вирусом:</TextBlock>
+                <RichTextBox x:Name="DescriptionRTB" Height="200" Margin="5"></RichTextBox>
+                <Button x:Name="SendBtn" Style="{StaticResource RoundButton}" Click="SendBtn_Click" Margin="5">Отправить</Button>
             </StackPanel>
         </StackPanel>
 

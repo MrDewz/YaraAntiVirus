@@ -42,140 +42,29 @@ namespace AVFramework.Windows
         public ReportVirusWindow()
         {
             InitializeComponent();
-            UpdateSendButtonState();
-            InitializeFolders();
-            
-            // Очищаем временные файлы при запуске
-            CleanupTempFiles();
-            
-            // Устанавливаем приоритет процесса
-            try
-            {
-                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
-            }
-            catch { /* Игнорируем ошибки при установке приоритета */ }
-
-            // Устанавливаем начальный текст
-            CurrentTask.Text = "Готов к отправке";
         }
-
-        private void InitializeFolders()
+        private void ChooseFileBtn_Click(object sender, RoutedEventArgs e)
         {
-            try
+            string filePath;
+            using (System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog())
             {
-                string draftsFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Drafts");
-                if (!Directory.Exists(draftsFolder))
+                openFileDialog.InitialDirectory = "c:\\";
+                openFileDialog.Filter = "All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 2;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    Directory.CreateDirectory(draftsFolder);
+                    //Get the path of specified file
+                    filePath = openFileDialog.FileName;
+                    FilePath = filePath;
+                    CurrentFile.Text += filePath;
+                    CurrentFile.Visibility = Visibility.Visible;
                 }
             }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show($"Ошибка при инициализации папок: {ex.Message}", 
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
         }
-
-        private void CleanupTempFiles()
-        {
-            try
-            {
-                string tempPath = Path.GetTempPath();
-                var tempFiles = Directory.GetFiles(tempPath, "screenshot_*.png");
-                foreach (var file in tempFiles)
-                {
-                    try
-                    {
-                        if (File.Exists(file))
-                        {
-                            File.Delete(file);
-                        }
-                    }
-                    catch { /* Игнорируем ошибки при удалении временных файлов */ }
-                }
-            }
-            catch { /* Игнорируем ошибки при очистке временных файлов */ }
-        }
-
-        private string CalculateFileHash(string filePath)
-        {
-            using (var sha256 = SHA256.Create())
-            using (var stream = File.OpenRead(filePath))
-            {
-                byte[] hash = sha256.ComputeHash(stream);
-                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-            }
-        }
-
-        private bool IsFileModified(string filePath, string originalHash)
-        {
-            try
-            {
-                string currentHash = CalculateFileHash(filePath);
-                return currentHash != originalHash;
-            }
-            catch
-            {
-                return true; // Если не можем проверить, считаем файл измененным
-            }
-        }
-
-        private string EncryptData(string data)
-        {
-            try
-            {
-                using (Aes aes = Aes.Create())
-                {
-                    byte[] key = Encoding.UTF8.GetBytes(ENCRYPTION_KEY.PadRight(32).Substring(0, 32));
-                    aes.Key = key;
-                    aes.IV = new byte[16];
-
-                    ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-
-                    using (MemoryStream msEncrypt = new MemoryStream())
-                    {
-                        using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                        using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                        {
-                            swEncrypt.Write(data);
-                        }
-                        return Convert.ToBase64String(msEncrypt.ToArray());
-                    }
-                }
-            }
-            catch
-            {
-                return data; // В случае ошибки возвращаем исходные данные
-            }
-        }
-
-        private string DecryptData(string encryptedData)
-        {
-            try
-            {
-                using (Aes aes = Aes.Create())
-                {
-                    byte[] key = Encoding.UTF8.GetBytes(ENCRYPTION_KEY.PadRight(32).Substring(0, 32));
-                    aes.Key = key;
-                    aes.IV = new byte[16];
-
-                    ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-
-                    using (MemoryStream msDecrypt = new MemoryStream(Convert.FromBase64String(encryptedData)))
-                    using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                    {
-                        return srDecrypt.ReadToEnd();
-                    }
-                }
-            }
-            catch
-            {
-                return encryptedData; // В случае ошибки возвращаем исходные данные
-            }
-        }
-
-        private bool CheckSuspiciousActivity(string filePath)
+        
+        private async void SendBtn_Click(object sender, RoutedEventArgs e)
         {
             try
             {
