@@ -59,15 +59,46 @@ namespace AVFramework.Windows
 
                 if (MessageBox.Show("Вы уверены что хотите оставить данный файл?", "Действие с файлом", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
                 {
-                    VirusesLB.Items.RemoveAt(index);                    
+                    VirusesLB.Items.RemoveAt(index);
                     MessageBox.Show("Файл занесен в список разрешенных!");
-                    File.AppendAllText("WhiteList.txt", ProbableViruses.ElementAt(index).Value + "\n");                    
+                    
+                    var yaraScanner = new YaraScanner();
+                    yaraScanner.AddToWhiteList(ProbableViruses.ElementAt(index).Value);
+                    
                     Event(2, index);
                 }
             }
             catch (Exception)
             {
                 MessageBox.Show("Не удалось разрешить!");
+            }
+        }
+
+        private async void QuarantineButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Button button = sender as Button;
+                int index = VirusesLB.Items.IndexOf(button.DataContext);
+
+                if (MessageBox.Show("Вы уверены, что хотите поместить файл в карантин?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                {
+                    string filePath = ProbableViruses.ElementAt(index).Value;
+                    if (await QuarantineManager.QuarantineFile(filePath))
+                    {
+                        VirusesLB.Items.RemoveAt(index);
+                        MessageBox.Show("Файл успешно помещен в карантин!");
+                        Event(3, index);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Не удалось поместить файл в карантин!");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при помещении в карантин: {ex.Message}");
             }
         }
 

@@ -1,5 +1,4 @@
 ﻿using AVFramework.Classes;
-using AVFramework.Windows;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,12 +7,25 @@ using System.Linq;
 using System.Management;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Documents;
 using YaraSharp;
 using MessageBox = System.Windows.MessageBox;
-using Window = System.Windows.Window;
+using Button = System.Windows.Controls.Button;
+using CheckBox = System.Windows.Controls.CheckBox;
+using ProgressBar = System.Windows.Controls.ProgressBar;
+using RichTextBox = System.Windows.Controls.RichTextBox;
+using AVFramework.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Media;
+using System.Windows.Media.Imaging;
+using System.Diagnostics;
+using NAudio.Wave;
+using WMPLib;
 
-namespace AVFramework
+namespace AVFramework.Windows
 {
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
@@ -25,30 +37,71 @@ namespace AVFramework
         private bool isDelete = false;
 
         private static string baseDirectory = Environment.CurrentDirectory;
+        private static string soundDirectory = Path.Combine(baseDirectory, "Sound");
+        private static string alertSoundPath = Path.Combine(soundDirectory, "donkey221.wav");
+        private static string tempWavPath = Path.Combine(Path.GetTempPath(), "temp_alert.wav");
 
         private static List<string> ruleFilenames;
 
         private static List<string> testfiles;
-
+        //ProbableViruses нужен чтоб передать информацию об обнаруженных вирусах в окно DetectedViruses
         private static Dictionary<List<YSMatches>, string> ProbableViruses = new Dictionary<List<YSMatches>, string>();
 
-        WindowState prevState;
+        private WindowState prevState;
 
-        YSInstance yaraInstance = new YSInstance();
+        private YSInstance yaraInstance = new YSInstance();
 
-        YSContext context = new YSContext();//вызывает MemoryLeak
+        private YSContext context = new YSContext();//вызывает MemoryLeak
 
-        YSCompiler compiler = new YSCompiler(null);
+        private YSCompiler compiler = new YSCompiler(null);
 
+        // AutoRunClass добавляет автозагрузку
+        private AutoRunClass autoRun = new AutoRunClass("YaraScanner");
 
-        AutoRunClass autoRun = new AutoRunClass("YaraScanner");
+        private bool isDarkTheme = false;
+
+        private SoundPlayer soundPlayer;
 
         public MainWindow()
         {
             InitializeComponent();
+            InitializeSoundPlayer();
             ruleFilenames = Directory.EnumerateFiles(Path.Combine(baseDirectory, "Rules"), "*.yar", SearchOption.AllDirectories).ToList();
-            AutoRunCheckBox.IsChecked = autoRun.IsAutoRun();
+         
+            {
+              
+            }
             StartListeningForFlashDrive();
+            ChangeTheme();
+        }
+
+        private void InitializeSoundPlayer()
+        {
+            try
+            {
+                if (File.Exists(alertSoundPath))
+                {
+                    soundPlayer = new SoundPlayer(alertSoundPath);
+                    soundPlayer.Load();
+                }
+                else
+                {
+                    MessageBox.Show("Файл звука не найден: " + alertSoundPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.ErrorLog(ex);
+            }
+        }
+
+        private void AppendText(string text)
+        {
+            if (LogBox != null)
+            {
+                LogBox.Document.Blocks.Add(new Paragraph(new Run(text)));
+                LogBox.ScrollToEnd();
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -66,11 +119,12 @@ namespace AVFramework
 
                     if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(openFolderDialog.SelectedPath))
                     {
-                        CurrentTask.Text = "Loading virus signature database, please wait...";
+                        CurrentTask.Text = "Загрузка базы сигнатур вирусов, пожалуйста, подождите...";
                         LogBox.Document.Blocks.Clear();
-                        testfiles = Directory.EnumerateFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();
-                        ScanPG.Maximum = testfiles.Count;
-                        MessageBox.Show("Файлов найдено: " + testfiles.Count.ToString(), "Сообщение");
+                        testfiles = Directory.EnumerateFiles(openFolderDialog.SelectedPath, "*", SearchOption.AllDirectories).ToList();                     
+                        MessageBox.Show(
+                            $"Файлов найдено: {testfiles.Count}", 
+                            "Сообщение");
                         DisplayRulesLoad();
 
                         BackgroundWorker worker = new BackgroundWorker();
@@ -78,7 +132,6 @@ namespace AVFramework
                         worker.DoWork += Scan;
                         worker.ProgressChanged += worker_ProgressChanged;
                         worker.RunWorkerAsync();
-
                     }
                 }
             }
@@ -102,10 +155,8 @@ namespace AVFramework
 
                 if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    CurrentTask.Text = "Loading virus signature database, please wait...";
-                    //Get the path of specified file
+                    CurrentTask.Text = "Загрузка базы сигнатур вирусов, пожалуйста, подождите...";
                     testfiles = openFileDialog.FileNames.ToList();
-                    ScanPG.Maximum = testfiles.Count;
                     DisplayRulesLoad();
 
                     BackgroundWorker worker = new BackgroundWorker();
@@ -117,54 +168,77 @@ namespace AVFramework
             }
         }
 
-        private void Scan(object sender, DoWorkEventArgs e)
+        private void PlayAlertSound()
         {
+            try
+            {
+                if (soundPlayer != null)
+                {
+                    soundPlayer.Play();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.ErrorLog(ex);
+            }
+        }
 
+        private async void Scan(object sender, DoWorkEventArgs e)
+        {
             try
             {
                 firstScan = false;
-                YaraScanner yaraScanner = new YaraScanner();
-
-                for (int i = 0; i < testfiles.Count; i++)
+                using (var yaraScanner = new YaraScanner())
+                using (var compiler = yaraInstance.CompileFromFiles(ruleFilenames, null))
                 {
+                    ProbableViruses.Clear();
+                    int totalFiles = testfiles.Count;
+                    int processedFiles = 0;
 
-                    Dispatcher.Invoke(() =>
+                    var results = await yaraScanner.ScanFilesAsync(testfiles, compiler, (currentFile, processed, total) =>
                     {
-                        CurrentTask.Text = $"Сейчас сканируется - {testfiles[i]}";
+                        processedFiles++;
+                        Dispatcher.Invoke(() =>
+                        {
+                            UpdateProgress(processedFiles, totalFiles, currentFile);
+                            LogBox.AppendText($"Сканирование файла {processedFiles} из {totalFiles}: {currentFile}\n");
+                        });
                     });
-                    
-                    var result = yaraScanner.ScanFile(testfiles[i], compiler);
-                    bool resultBool = false;
 
-                    (sender as BackgroundWorker).ReportProgress(i);
-
-                    if (result.Count > 0)
+                    foreach (var result in results)
                     {
-                        ProbableViruses.Add(result, testfiles[i]);
-                        resultBool = true;
+                        ProbableViruses.Add(result.Value, result.Key);
+                        ScanHistoryManager.AddScanResult(result.Key, "Обнаружен вирус");
+                        Dispatcher.Invoke(() =>
+                        {
+                            LogBox.AppendText($"Файл {result.Key} содержит вирус\n");
+                        });
                     }
 
                     Dispatcher.Invoke(() =>
                     {
-                        LogBox.AppendText($"File {testfiles[i]} is {resultBool} virus\n");
+                        CurrentTask.Text = "Сканирование завершено";
+                        if (ProbableViruses.Count > 0)
+                        {
+                            PlayAlertSound();
+                            MessageBox.Show($"Сканирование завершено! Вирусов найдено: {ProbableViruses.Count}");
+                            DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
+                            detectedVirusesWindow.Show();
+                        }
+                        else
+                        {
+                            MessageBox.Show("Сканирование завершено! Вирусов не обнаружено.");
+                        }
                     });
                 }
-
-                MessageBox.Show($"Сканирование завершено! Вирусов найдено {ProbableViruses.Count}");
-                if (ProbableViruses.Count > 0)
-                {
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        DetectedViruses detectedVirusesWindow = new DetectedViruses(ProbableViruses);
-                        detectedVirusesWindow.Show();
-                    });
-                }                
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка сканирования");
-                Logging.ErrorLog(ex);
-                throw;
+                Dispatcher.Invoke(() =>
+                {
+                    MessageBox.Show($"Ошибка при сканировании: {ex.Message}");
+                    Logging.ErrorLog(ex);
+                });
             }
         }
 
@@ -174,19 +248,23 @@ namespace AVFramework
             {
                 if (firstScan)
                 {
+                    compiler?.Dispose();
                     compiler = yaraInstance.CompileFromFiles(ruleFilenames, null);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Ошибка загрузки сигнатур");
-                throw;
+                MessageBox.Show($"Ошибка загрузки сигнатур: {ex.Message}", 
+                    "Ошибка", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+                LogBox.AppendText($"Ошибка загрузки сигнатур: {ex.Message}\n");
+                Logging.ErrorLog(ex);
             }
         }
 
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            ScanPG.Value += 1;
         }
 
         private void DisplayRulesLoad()
@@ -196,7 +274,7 @@ namespace AVFramework
 
             Dispatcher.Invoke(() =>
             {
-                CurrentTask.Text = "Loading virus signature database, please wait...";
+                CurrentTask.Text = "Загрузка базы сигнатур вирусов, пожалуйста, подождите...";
             });
 
             Thread thread = new Thread(new ThreadStart(LoadRules));
@@ -204,7 +282,7 @@ namespace AVFramework
 
             while (thread.IsAlive)
             {
-                CurrentTask.Text = "Loading virus signature database, please wait..." + loadingAnimation[i];
+                CurrentTask.Text = "Загрузка базы сигнатур вирусов, пожалуйста, подождите..." + loadingAnimation[i];
                 i++;
                 if (i == 4)
                 {
@@ -233,18 +311,25 @@ namespace AVFramework
         {
             autoRun.DeleteAutoRun();
 
-            if (AutoRunCheckBox.IsChecked == true)
+          
             {
-                isDelete = true;
-                AutoRunCheckBox.IsChecked = false;
+               
             }
             MessageBox.Show("Успешно удалено!");
         }
 
         private void VirusReport_Click(object sender, RoutedEventArgs e)
         {
-            ReportVirusWindow reportVirusWindow = new ReportVirusWindow();
-            reportVirusWindow.ShowDialog();
+            var reportWindow = new ReportVirusWindow();
+            reportWindow.Owner = this;
+            reportWindow.ShowDialog();
+        }
+
+        private void ScanHistoryBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var historyWindow = new ScanHistoryWindow();
+            historyWindow.Owner = this;
+            historyWindow.Show();
         }
 
         private void StartListeningForFlashDrive()
@@ -298,7 +383,6 @@ namespace AVFramework
 
             Dispatcher.Invoke(() =>
             {
-                ScanPG.Maximum = testfiles.Count;
                 DisplayRulesLoad();
 
                 BackgroundWorker worker = new BackgroundWorker();
@@ -333,6 +417,92 @@ namespace AVFramework
         {
             //ComputerRegistrationWindow computerRegistrationWindow = new ComputerRegistrationWindow();
             //computerRegistrationWindow.ShowDialog();
+        }
+
+        private void SettingsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsWindow = new SettingsWindow();
+            if (settingsWindow.ShowDialog() == true)
+            {
+                // Применяем новые настройки
+                ApplySettings();
+            }
+        }
+
+        private void ApplySettings()
+        {
+            var settings = Properties.Settings.Default;
+            // Применяем настройки сканирования
+            // TODO: Реализовать применение настроек в логике сканирования
+        }
+
+        private void UpdateProgress(int currentFile, int totalFiles, string currentFileName)
+        {
+            // Обновляем общий прогресс
+            double overallProgress = (double)currentFile / totalFiles * 100;
+            OverallProgressBar.Value = overallProgress;
+            OverallProgressText.Text = $"Общий прогресс: {overallProgress:F1}%";
+
+            // Обновляем детальный прогресс
+            DetailedProgressText.Text = $"Текущий файл: {currentFileName}";
+        }
+
+        private void ScanBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Button_Click(sender, e);
+        }
+
+        private void QuarantineBtn_Click(object sender, RoutedEventArgs e)
+        {
+            var quarantineWindow = new QuarantineWindow();
+            quarantineWindow.Owner = this;
+            quarantineWindow.ShowDialog();
+        }
+
+        private void ReportsBtn_Click(object sender, RoutedEventArgs e)
+        {
+            ScanHistoryBtn_Click(sender, e);
+        }
+
+        private void ChangeTheme()
+        {
+            var dict = new ResourceDictionary();
+            if (isDarkTheme)
+            {
+                dict.Source = new Uri("/AVFramework;component/Themes/DarkTheme.xaml", UriKind.Relative);
+            }
+            else
+            {
+                dict.Source = new Uri("/AVFramework;component/Themes/LightTheme.xaml", UriKind.Relative);
+            }
+
+            System.Windows.Application.Current.Resources.MergedDictionaries.Clear();
+            System.Windows.Application.Current.Resources.MergedDictionaries.Add(dict);
+        }
+
+        private void ThemeButton_Click(object sender, RoutedEventArgs e)
+        {
+            isDarkTheme = !isDarkTheme;
+            ChangeTheme();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            if (soundPlayer != null)
+            {
+                soundPlayer.Dispose();
+                soundPlayer = null;
+            }
+            // Удаляем временный WAV файл
+            try
+            {
+                if (File.Exists(tempWavPath))
+                {
+                    File.Delete(tempWavPath);
+                }
+            }
+            catch { }
         }
     }
 }

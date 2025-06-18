@@ -5,17 +5,430 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AVFramework.Windows"
         mc:Ignorable="d"
-        Title="ReportVirusWindow" Height="430" Width="800" ResizeMode="CanMinimize">
+        Title="Отправка отчета о вирусе" Height="700" Width="900" 
+        WindowStartupLocation="CenterOwner"
+        Background="#FF1E1E1E"
+        ResizeMode="CanMinimize">
+    
+    <Window.Resources>
+        <!-- Цвета -->
+        <SolidColorBrush x:Key="PrimaryColor" Color="#FFD3D3D3"/>
+        <SolidColorBrush x:Key="TextColor" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="BackgroundColor" Color="#FF2D2D2D"/>
+        <SolidColorBrush x:Key="BorderColor" Color="#FF404040"/>
+        <SolidColorBrush x:Key="ProgressBackground" Color="#FF2D2D2D"/>
+
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="5" 
+                                                ShadowDepth="1" 
+                                                Opacity="0.2"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FF3D3D3D" Offset="0"/>
+                                <GradientStop Color="#FF2D2D2D" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="8" 
+                                            ShadowDepth="2" 
+                                            Opacity="0.3"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF1D1D1D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModernTextBlock" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="2" 
+                                    ShadowDepth="1" 
+                                    Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernRichTextBox" TargetType="RichTextBox">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FF3D3D3D"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RichTextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" 
+                                                ShadowDepth="2" 
+                                                Opacity="0.2"/>
+                            </Border.Effect>
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                        Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernProgressBar" TargetType="ProgressBar">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="#FFD3D3D3"/>
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderThickness="0"
+                                    CornerRadius="2"/>
+                            <Border x:Name="PART_Indicator"
+                                    Background="{TemplateBinding Foreground}"
+                                    BorderThickness="0"
+                                    CornerRadius="2"
+                                    HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernComboBox" TargetType="ComboBox">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="MaxDropDownHeight" Value="200"/>
+            <Setter Property="IsEditable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton"
+                                        BorderThickness="0"
+                                        Background="{TemplateBinding Background}"
+                                        IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderThickness="0"
+                                                Padding="5">
+                                            <Path x:Name="Arrow"
+                                                  Fill="White"
+                                                  Data="M0,0 L4,4 L8,0 Z"
+                                                  HorizontalAlignment="Right"
+                                                  VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite"
+                                            Content="{TemplateBinding SelectionBoxItem}"
+                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                            Margin="5,0,25,0"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Left"/>
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   PopupAnimation="Fade">
+                                <Border x:Name="DropDownBorder"
+                                        Background="#FF2D2D2D"
+                                        BorderThickness="1"
+                                        BorderBrush="#FF3D3D3D"
+                                        CornerRadius="5">
+                                    <ScrollViewer SnapsToDevicePixels="True">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3D3D3D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModernComboBoxItem" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3D3D3D"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FF4D4D4D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="ModernListBox" TargetType="ListBox">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#FF3D3D3D"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" 
+                                                ShadowDepth="2" 
+                                                Opacity="0.2"/>
+                            </Border.Effect>
+                            <ScrollViewer Padding="{TemplateBinding Padding}">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ModernListBoxItem" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                CornerRadius="3"
+                                Padding="{TemplateBinding Padding}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="3" 
+                                                ShadowDepth="1" 
+                                                Opacity="0.1"/>
+                            </Border.Effect>
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3D3D3D"/>
+                </Trigger>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#FF4D4D4D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для кнопки экспорта -->
+        <Style x:Key="ExportButton" TargetType="Button" BasedOn="{StaticResource ModernButton}">
+            <Setter Property="Background" Value="#FF007ACC"/>
+        </Style>
+
+        <!-- Стиль для заголовка -->
+        <Style x:Key="HeaderText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource TextColor}"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect BlurRadius="2" 
+                                    ShadowDepth="1" 
+                                    Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Отправка вируса" 
+                   Style="{StaticResource HeaderText}"
+                   Margin="10"/>
+
+        <!-- Выбор файлов -->
+        <StackPanel Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="Выберите файлы для отправки:" Style="{StaticResource ModernTextBlock}"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <ListBox x:Name="FilesListBox" 
+                         Style="{StaticResource ModernListBox}"
+                         Grid.Column="0"
+                         Height="150"
+                         Margin="0,5,10,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
     <Grid>
-        <StackPanel>
-            <StackPanel Margin="5">
-                <TextBlock Style="{StaticResource NormBlock}">Выберите файл который хотите зарепортить:</TextBlock>
-                <Button x:Name="ChooseFileBtn" Style="{StaticResource RoundButton}" HorizontalAlignment="Left" Click="ChooseFileBtn_Click" Margin="5">Выбрать файл</Button>
-                <TextBlock Name="CurrentFile" Text="Файл выбран: " Style="{StaticResource NormBlock}" Visibility="Collapsed"></TextBlock>
-                <TextBlock Style="{StaticResource NormBlock}">Пожалуйста опишите почему вы считаете этот файл вирусом:</TextBlock>
-                <RichTextBox x:Name="DescriptionRTB" Height="200" Margin="5"></RichTextBox>
-                <Button x:Name="SendBtn" Style="{StaticResource RoundButton}" Click="SendBtn_Click" Margin="5">Отправить</Button>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding FileName}" 
+                                         Style="{StaticResource ModernTextBlock}"
+                                         VerticalAlignment="Center"/>
+                                <Button Grid.Column="1"
+                                        Content="Удалить"
+                                        Style="{StaticResource ModernButton}"
+                                        Click="RemoveFile_Click"
+                                        Tag="{Binding FileName}"
+                                        Margin="5,0,0,0"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <StackPanel Grid.Column="1" 
+                          Orientation="Vertical" 
+                          VerticalAlignment="Top">
+                    <Button x:Name="ChooseFileBtn"
+                            Content="Выбрать файлы"
+                            Style="{StaticResource ModernButton}"
+                            Click="ChooseFileBtn_Click"/>
+                    <Button x:Name="AddScreenshotBtn"
+                            Content="Добавить скриншот"
+                            Style="{StaticResource ModernButton}"
+                            Margin="0,5,0,0"
+                            Click="AddScreenshotBtn_Click"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- Описание -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,10">
+            <TextBlock Text="Описание проблемы:" Style="{StaticResource ModernTextBlock}"/>
+            <ComboBox x:Name="TemplateComboBox"
+                      Style="{StaticResource ModernComboBox}"
+                      Margin="0,5,0,10"
+                      SelectionChanged="TemplateComboBox_SelectionChanged">
+                <ComboBoxItem Content="Подозрительная активность"/>
+                <ComboBoxItem Content="Сетевая активность"/>
+                <ComboBoxItem Content="Неизвестный процесс"/>
+                <ComboBoxItem Content="Подозрительный файл"/>
+            </ComboBox>
+            <RichTextBox x:Name="DescriptionRTB"
+                         Style="{StaticResource ModernRichTextBox}"
+                         Height="150"
+                         VerticalScrollBarVisibility="Auto"/>
+        </StackPanel>
+
+        <!-- Прогресс и кнопки -->
+        <StackPanel Grid.Row="3">
+            <TextBlock x:Name="CurrentTask" 
+                      Text="Готов к отправке" 
+                      Style="{StaticResource ModernTextBlock}"
+                      Margin="0,0,0,5"/>
+            <ProgressBar x:Name="ProgressBar"
+                         Style="{StaticResource ModernProgressBar}"
+                         Height="4"
+                         Margin="0,0,0,10"/>
+            
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right">
+                <Button x:Name="SendBtn"
+                        Content="Отправить"
+                        Style="{StaticResource ModernButton}"
+                        Margin="10,0,0,0"
+                        Click="SendBtn_Click"/>
+                <Button x:Name="SaveDraftBtn"
+                        Content="Сохранить черновик"
+                        Style="{StaticResource ModernButton}"
+                        Margin="10,0,0,0"
+                        Click="SaveDraftBtn_Click"/>
+                <Button x:Name="AboutBtn"
+                        Content="О программе"
+                        Style="{StaticResource ModernButton}"
+                        Margin="10,0,0,0"
+                        Click="AboutBtn_Click"/>
+                <Button x:Name="CancelBtn"
+                        Content="Отмена"
+                        Style="{StaticResource ModernButton}"
+                        Margin="10,0,0,0"
+                        Click="CancelBtn_Click"/>
             </StackPanel>
+        </StackPanel>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
+            <!-- <Button Content="Назад"
+                    Style="{StaticResource ModernButton}"
+                    Margin="0,0,10,0"
+                    Click="BackButton_Click"/> -->
+            <!-- <Button Content="Отправить"
+                    Style="{StaticResource ExportButton}"
+                    Click="SendBtn_Click"/> -->
         </StackPanel>
     </Grid>
 </Window>

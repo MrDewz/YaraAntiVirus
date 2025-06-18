@@ -1,0 +1,123 @@
+<Window x:Class="AVFramework.Windows.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="О программе" Height="500" Width="600"
+        WindowStartupLocation="CenterOwner"
+        Background="#FF1E1E1E">
+    <Window.Resources>
+        <Style x:Key="ModernTextBlock" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#FF2D2D2D"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#FF3D3D3D"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#FF1D1D1D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Text="AV Framework" 
+                   Style="{StaticResource ModernTextBlock}"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,20"/>
+
+        <!-- Основной контент -->
+        <ScrollViewer Grid.Row="1" 
+                      VerticalScrollBarVisibility="Auto"
+                      Margin="0,0,0,20">
+            <StackPanel>
+                <TextBlock Text="О программе" 
+                           Style="{StaticResource ModernTextBlock}"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="AV Framework - это современный антивирусный сканер, использующий YARA правила для обнаружения вредоносного ПО. Программа обеспечивает эффективное сканирование файлов и процессов на наличие известных вредоносных сигнатур."
+                           Style="{StaticResource ModernTextBlock}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20"/>
+
+                <TextBlock Text="YARA правила" 
+                           Style="{StaticResource ModernTextBlock}"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="YARA - это инструмент для определения и классификации вредоносного ПО. Наш сканер использует следующие типы правил:"
+                           Style="{StaticResource ModernTextBlock}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="• Строковые правила - поиск специфических последовательностей байтов\n• Регулярные выражения - поиск по шаблонам\n• Условия - логические операции для определения вредоносного поведения\n• Метаданные - информация о правиле и его назначении"
+                           Style="{StaticResource ModernTextBlock}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20"/>
+
+                <TextBlock Text="Возможности сканера" 
+                           Style="{StaticResource ModernTextBlock}"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="• Сканирование файлов и процессов\n• Обнаружение известных вредоносных сигнатур\n• Мониторинг подозрительной активности\n• Отправка отчетов о вирусах\n• Автоматическое обновление правил\n• Защита от новых угроз"
+                           Style="{StaticResource ModernTextBlock}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,20"/>
+
+                <TextBlock Text="Версия: 1.0.0" 
+                           Style="{StaticResource ModernTextBlock}"
+                           Margin="0,0,0,10"/>
+
+                <TextBlock Text="© 2024 AV Framework. Все права защищены." 
+                           Style="{StaticResource ModernTextBlock}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Кнопка закрытия -->
+        <Button Grid.Row="2" 
+                Content="Закрыть" 
+                Style="{StaticResource ModernButton}"
+                Width="100"
+                HorizontalAlignment="Center"
+                Click="CloseButton_Click"/>
+    </Grid>
+</Window> 

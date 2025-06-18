@@ -25,8 +25,33 @@ namespace Reporter
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public SeriesCollection SeriesCollection { get; set; }
-        public List<string> Labels { get; set; }
+        private SeriesCollection _seriesCollection;
+        private List<string> _labels;
+
+        public SeriesCollection SeriesCollection
+        {
+            get => _seriesCollection;
+            set
+            {
+                _seriesCollection = value;
+                OnPropertyChanged(nameof(SeriesCollection));
+            }
+        }
+
+        public List<string> Labels
+        {
+            get => _labels;
+            set
+            {
+                _labels = value;
+                OnPropertyChanged(nameof(Labels));
+            }
+        }
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
